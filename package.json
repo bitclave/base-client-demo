@@ -21,6 +21,9 @@
     "url": "https://github.com/bitclave/base-js/issues"
   },
   "homepage": "https://github.com/bitclave/base-js#readme",
-  "dependencies": {},
+  "dependencies": {
+    "config": "^2.0.1",
+    "express": "^4.16.4"
+  },
   "devDependencies": {}
 }
