@@ -13,7 +13,8 @@ import ClientDataList from '../components/lists/SimplePairList';
 import { RouteComponentProps } from 'react-router';
 import ButtonGroup from 'reactstrap/lib/ButtonGroup';
 import Pair from '../models/Pair';
-import Web3 from 'web3';
+// import Web3 from 'web3';
+import Web3 = require('web3');
 
 const ethUtil = require('ethereumjs-util');
 
@@ -31,14 +32,16 @@ interface State {
     clientData: Array<Pair<string, string>>;
 }
 
-var web3: Web3;
+var web3;
 
 window.addEventListener('load', function () {
     if (typeof window.web3 !== 'undefined') {
         // Use Mist/MetaMask's provider.
-        web3 = new Web3(window.web3.currentProvider);
-
-
+        try {
+          web3 = new Web3(window.web3.currentProvider);
+        } catch (err) {
+          console.log(err);
+        }
         console.log('Injected web3 detected.');
     }
 });
