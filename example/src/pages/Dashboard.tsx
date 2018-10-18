@@ -106,7 +106,8 @@ export default class Dashboard extends React.Component<Props, State> {
                                 <Row>
                                     <Col className="p-0" xs="1" sm="2">
                                         <Input
-                                            value={'eth_address'} readOnly
+                                            value={'eth_address'}
+                                            readOnly
                                         />
                                     </Col>
                                     <Col className="p-0" xs="1" sm="5">
@@ -319,8 +320,7 @@ export default class Dashboard extends React.Component<Props, State> {
             var res = this.baseManager.getProfileManager().validateEthWallets(
                 this.state.clientData[pos].key, msg, this.baseManager.getId());
             alert(JSON.stringify(res));
-        }
-        else {
+        } else {
             alert('no eth_wallets found');
         }
     }
@@ -344,15 +344,14 @@ export default class Dashboard extends React.Component<Props, State> {
                 alert('exception in onSignWallets: ' + err);
             }
 
-        }
-        else {
+        } else {
             alert('no eth_wallets found');
         }
     }
 
     private async onSetEthSignature() {
         var signingAddr: string = '';
-        if (typeof web3 == 'undefined') {
+        if (typeof web3 === 'undefined') {
             alert('WEB3 is not detected');
             return;
         }
@@ -361,13 +360,12 @@ export default class Dashboard extends React.Component<Props, State> {
             signingAddr = res[0];
         });
 
-        if ((signingAddr == '') || (signingAddr == undefined)) {
+        if ((signingAddr === '') || (signingAddr === undefined)) {
             alert('Can not detect ETH address from WEB3 provider.\nPlease login');
             return;
         }
 
-
-        //always use lower casse for addresses
+        // always use lower casse for addresses
         signingAddr = signingAddr.toLowerCase();
 
         var thisMessage = JSON.stringify(
@@ -377,7 +375,7 @@ export default class Dashboard extends React.Component<Props, State> {
             }
         );
         var signedMessage = '';
-        if (typeof web3 != 'undefined') {
+        if (typeof web3 !== 'undefined') {
             // alert('onSetEthSignature');
             var msg = ethUtil.bufferToHex(new Buffer(thisMessage, 'utf8'));
 
@@ -386,21 +384,18 @@ export default class Dashboard extends React.Component<Props, State> {
             // alert("Sent message for signing via MetaMask / Mist.");
 
             var sig: string;
-            await web3.currentProvider.sendAsync({
-                method,
-                params,
-                signingAddr,
-            }, function (err, result) {
+            await web3.currentProvider.sendAsync({ method, params, signingAddr }, function (err, result) {
                 // if (err) return $scope.notifier.danger(err)
                 // if (result.error) return $scope.notifier.danger(result.error)
                 sig = result.result;
-                signedMessage = JSON.stringify({
+                const options = {
                     address: signingAddr,
                     msg: thisMessage,
                     sig: sig,
                     version: '3',
                     signer: 'web3'
-                }, null, 2);
+                };
+                signedMessage = JSON.stringify(options, null, 2);
                 // alert('Successfully Signed Message with ' + signingAddr + signedMessage);
                 g_Dashboard.setState({ethSignature: sig});
                 g_Dashboard.setState({ethAddress: signingAddr});

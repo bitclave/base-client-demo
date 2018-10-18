@@ -23,9 +23,9 @@ export default class SimplePairList extends AbstractList<Properties, Pair<string
     private getDeleteCallBack(): Function | null {
         const {onDeleteClick} = this.props;
         if (onDeleteClick) {
-            return () => onDeleteClick(dataItem.key)
+            return () => onDeleteClick(dataItem.key);
         } else {
-            return null
+            return null;
         }
 
     }

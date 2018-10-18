@@ -8,7 +8,7 @@ import Offer from 'bitclave-base/repository/models/Offer';
 import OfferList from '../components/lists/OfferList';
 import SearchRequest from 'bitclave-base/repository/models/SearchRequest';
 import SearchRequestList from '../components/lists/SearchRequestList';
-import {OfferSearch} from 'bitclave-base';
+import { OfferSearch } from 'bitclave-base';
 
 interface Props extends RouteComponentProps<{}> {
 }

@@ -30,7 +30,7 @@
     "web3-typescript-typings": "^0.10.2"
   },
   "scripts": {
-    "prepare":"node utils/remove-bitcore-lib-dep.js && node utils/del.js TEMP-base-client-js node_modules/bitclave-base node_modules/@types/bitclave-base && git clone --branch master --depth 1 https://github.com/bitclave/base-client-js.git TEMP-base-client-js && node utils/copy.js TEMP-base-client-js/example/public/base-lib/bitclave-base node_modules/bitclave-base/ && node utils/copy.js TEMP-base-client-js/example/public/base-lib/@types/bitclave-base node_modules/@types/bitclave-base/ && node utils/del.js TEMP-base-client-js",
+    "prepare": "node utils/remove-bitcore-lib-dep.js && node utils/del.js TEMP-base-client-js node_modules/bitclave-base node_modules/@types/bitclave-base && git clone --branch master --depth 1 https://github.com/bitclave/base-client-js.git TEMP-base-client-js && node utils/copy.js TEMP-base-client-js/example/public/base-lib/bitclave-base node_modules/bitclave-base/ && node utils/copy.js TEMP-base-client-js/example/public/base-lib/@types/bitclave-base node_modules/@types/bitclave-base/ && node utils/del.js TEMP-base-client-js",
     "start": "react-scripts-ts start",
     "build": "react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",

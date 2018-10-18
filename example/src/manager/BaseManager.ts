@@ -3,16 +3,17 @@ import { injectable } from 'inversify';
 import 'reflect-metadata';
 import Base, { AccessRight, RepositoryStrategyType, OfferSearch, DataRequestManager } from 'bitclave-base';
 import Account from 'bitclave-base/repository/models/Account';
-import OfferManager from 'bitclave-base/manager/OfferManager';
-import ProfileManager from 'bitclave-base/manager/ProfileManager';
-import SearchManager from 'bitclave-base/manager/SearchManager';
-import WalletManager from 'bitclave-base/manager/WalletManager';
+import Offer from 'bitclave-base/repository/models/Offer';
+import { OfferManager } from 'bitclave-base/manager/OfferManager';
+import { ProfileManager } from 'bitclave-base/manager/ProfileManager';
+import { SearchManager } from 'bitclave-base/manager/SearchManager';
+import { WalletManager } from 'bitclave-base/manager/WalletManager';
 
 @injectable()
 export default class BaseManager {
 
-    private base: Base;
     public account: Account;
+    private base: Base;
 
     constructor() {
         this.base = new Base(Config.getBaseEndPoint(), location.hostname);
@@ -37,8 +38,6 @@ export default class BaseManager {
             .then(account => this.account = account);
     }
 
-
-
     public sendAccountToServerSide(account: Account): Promise<Account> {
         return new Promise<Account>(resolve => {
             console.log('account for server side: ', account);
@@ -52,7 +51,8 @@ export default class BaseManager {
     }
 
     unsubscribe(mnemonicPhrase: string): Promise<Account> {
-        return this.base.accountManager.unsubscribe(mnemonicPhrase)
+        return this.base.accountManager
+            .unsubscribe()
             .then(account => this.account = account);
     }
 

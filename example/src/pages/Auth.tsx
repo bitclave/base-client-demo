@@ -85,7 +85,7 @@ export default class Auth extends React.Component<Props, State> {
     }
 
     private onChangeStrategy(collection: HTMLSelectElement) {
-        const item: HTMLOptionElement = collection[collection.selectedIndex];
+        const item: HTMLOptionElement = (collection[collection.selectedIndex] as HTMLOptionElement);
         const strategy: RepositoryStrategyType = item.getAttribute('data-value') as RepositoryStrategyType;
         this.setState({strategy: strategy});
         this.baseManager.changeStrategy(strategy);
@@ -108,7 +108,7 @@ export default class Auth extends React.Component<Props, State> {
             })
             .catch(response => {
                 alert('message: ' + response.json.error);
-            })
+            });
     }
 
     private onSingUp() {
@@ -152,7 +152,7 @@ export default class Auth extends React.Component<Props, State> {
         }
         this.baseManager.unsubscribe(this.state.mnemonicPhrase)
             .then(account => {
-                alert('User deleted')
+                alert('User deleted');
                 this.onChangeMnemonic('');
             })
             .catch(response => {

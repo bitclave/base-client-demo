@@ -90,7 +90,7 @@ export default class DataPermissions extends React.Component<Props, State> imple
         const result: Array<PermissionModel> = [];
         let requestFields: Array<string> = [];
         let authData: Map<string, string> = new Map();
-        let json: any;
+        let json;
 
         for (let item of requests) {
             requestFields = await this.baseManager.decryptRequestFields(item.fromPk, item.requestData);
