@@ -1,7 +1,7 @@
 {
-  "name": "@bitclave/base-client-js",
-  "version": "0.1.1",
-  "description": "Base JS library for BASE-platform",
+  "name": "base-client-js-demo",
+  "version": "0.0.1",
+  "description": "Demo application for base-client-js library testing",
   "main": "dist/Bitclave-Base.js",
   "scripts": {
     "start": "node app.js"
