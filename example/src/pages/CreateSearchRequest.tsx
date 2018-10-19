@@ -11,7 +11,7 @@ import { lazyInject } from '../Injections';
 import BaseManager from '../manager/BaseManager';
 import { RouteComponentProps } from 'react-router';
 import Pair from '../models/Pair';
-import { SearchRequest } from 'bitclave-base';
+import { SearchRequest } from '@bitclave/base-client-js';
 import SimplePairList from '../components/lists/SimplePairList';
 
 interface Props extends RouteComponentProps<{}> {

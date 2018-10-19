@@ -2,12 +2,12 @@ import * as React from 'react';
 import BaseManager, { SyncDataListener } from '../manager/BaseManager';
 import { lazyInject } from '../Injections';
 import { RouteComponentProps } from 'react-router';
-import DataRequest from 'bitclave-base/repository/models/DataRequest';
+import DataRequest from '@bitclave/base-client-js';
 import Button from 'reactstrap/lib/Button';
 import Container from 'reactstrap/lib/Container';
 import PermissionModel from '../models/PermissionModel';
 import PermissionsList from '../components/lists/PermissionsList';
-import { JsonUtils } from 'bitclave-base';
+import { JsonUtils } from '@bitclave/base-client-js';
 
 interface Props extends RouteComponentProps<{}> {
 }

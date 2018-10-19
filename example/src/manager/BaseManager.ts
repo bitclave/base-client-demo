@@ -1,13 +1,13 @@
 import Config from '../Config';
 import { injectable } from 'inversify';
 import 'reflect-metadata';
-import Base, { AccessRight, RepositoryStrategyType, OfferSearch, DataRequestManager } from 'bitclave-base';
-import Account from 'bitclave-base/repository/models/Account';
-import Offer from 'bitclave-base/repository/models/Offer';
-import { OfferManager } from 'bitclave-base/manager/OfferManager';
-import { ProfileManager } from 'bitclave-base/manager/ProfileManager';
-import { SearchManager } from 'bitclave-base/manager/SearchManager';
-import { WalletManager } from 'bitclave-base/manager/WalletManager';
+import Base, { AccessRight, RepositoryStrategyType, OfferSearch, DataRequestManager } from '@bitclave/base-client-js';
+import Account from '@bitclave/base-client-js';
+import Offer from '@bitclave/base-client-js';
+import { OfferManager } from '@bitclave/base-client-js';
+import { ProfileManager } from '@bitclave/base-client-js';
+import { SearchManager } from '@bitclave/base-client-js';
+import { WalletManager } from '@bitclave/base-client-js';
 
 @injectable()
 export default class BaseManager {

@@ -7,7 +7,7 @@ import Form from 'reactstrap/lib/Form';
 import { RouteComponentProps } from 'react-router';
 import { lazyInject } from '../Injections';
 import BaseManager from '../manager/BaseManager';
-import { RepositoryStrategyType } from 'bitclave-base';
+import { RepositoryStrategyType } from '@bitclave/base-client-js';
 
 interface Props extends RouteComponentProps<{}> {
 }
