@@ -8,15 +8,15 @@ import Input from 'reactstrap/lib/Input';
 import Row from 'reactstrap/lib/Row';
 import Col from 'reactstrap/lib/Col';
 import { lazyInject } from '../Injections';
-import BaseManager, { SyncDataListener } from '../manager/BaseManager';
+// import BaseManager, { SyncDataListener } from '../manager/BaseManager';
 import ClientDataList from '../components/lists/SimplePairList';
 import { RouteComponentProps } from 'react-router';
 import ButtonGroup from 'reactstrap/lib/ButtonGroup';
 import Pair from '../models/Pair';
-// import Web3 from 'web3';
-import Web3 = require('web3');
-
+import Web3 from 'web3';
+// import Web3 = require('web3');
 const ethUtil = require('ethereumjs-util');
+import BaseManager from '../manager/BaseManager';
 
 interface Props extends RouteComponentProps<{}> {
 }
@@ -32,10 +32,10 @@ interface State {
     clientData: Array<Pair<string, string>>;
 }
 
-var web3;
+var web3: Web3;
 
 window.addEventListener('load', function () {
-    if (typeof window.web3 !== 'undefined') {
+    if (window && typeof (window as any).web3 !== 'undefined') {
         // Use Mist/MetaMask's provider.
         try {
           web3 = new Web3(window.web3.currentProvider);
@@ -46,7 +46,7 @@ window.addEventListener('load', function () {
     }
 });
 
-var g_Dashboard: any;
+var g_Dashboard;
 
 export default class Dashboard extends React.Component<Props, State> {
 
@@ -60,6 +60,8 @@ export default class Dashboard extends React.Component<Props, State> {
             inputValue: '',
             ethAddress: '',
             ethSignature: '',
+            numberRequests: 0,
+            numberResponses: 0,
             clientDataRefreshhTrigger: 0,
             clientData: []
         };
@@ -67,7 +69,8 @@ export default class Dashboard extends React.Component<Props, State> {
 
     componentDidMount() {
         this.getDataList();
-        this.state.ethSignature = '';
+        this.setState({ethSignature: ''});
+        // this.state.ethSignature = '';
 
         g_Dashboard = this;
     }
@@ -106,8 +109,7 @@ export default class Dashboard extends React.Component<Props, State> {
                                 <Row>
                                     <Col className="p-0" xs="1" sm="2">
                                         <Input
-                                            value={'eth_address'}
-                                            readOnly
+                                            value={'eth_address'} readOnly
                                         />
                                     </Col>
                                     <Col className="p-0" xs="1" sm="5">
@@ -195,11 +197,13 @@ export default class Dashboard extends React.Component<Props, State> {
         this.baseManager.loadClientData()
             .then(data => {
                 try {
-                    this.state.clientData = [];
+                    this.setState({clientData: []}) ;
+                    // this.state.clientData = [];
                     data.forEach((value, key) => {
                         this.state.clientData.push(new Pair(key, value));
                     });
-                    this.state.clientDataRefreshhTrigger = 1;
+                    this.setState({clientDataRefreshhTrigger: 1});
+                    // this.state.clientDataRefreshhTrigger = 1;
                     this.setState({clientData: this.state.clientData});
                 } catch (e) {
                     console.log(e);
@@ -317,8 +321,10 @@ export default class Dashboard extends React.Component<Props, State> {
         var pos = this.state.clientData.findIndex(model => model.key === 'eth_wallets');
         if (pos >= 0) {
             var msg = JSON.parse(this.state.clientData[pos].value);
-            var res = this.baseManager.getProfileManager().validateEthWallets(
-                this.state.clientData[pos].key, msg, this.baseManager.getId());
+            var res = this.baseManager
+                .getProfileManager()
+                .validateEthWallets( this.state.clientData[pos].key, msg, this.baseManager.getId());
+
             alert(JSON.stringify(res));
         } else {
             alert('no eth_wallets found');
@@ -349,59 +355,61 @@ export default class Dashboard extends React.Component<Props, State> {
         }
     }
 
-    private async onSetEthSignature() {
+    private onSetEthSignature() {
         var signingAddr: string = '';
+
         if (typeof web3 === 'undefined') {
             alert('WEB3 is not detected');
             return;
         }
-        await web3.eth.getAccounts((err, res) => {
-            console.log(res[0]);
-            signingAddr = res[0];
-        });
 
-        if ((signingAddr === '') || (signingAddr === undefined)) {
-            alert('Can not detect ETH address from WEB3 provider.\nPlease login');
-            return;
-        }
+        ( async () => {
+            const accounts = await web3.eth.getAccounts();
 
-        // always use lower casse for addresses
-        signingAddr = signingAddr.toLowerCase();
-
-        var thisMessage = JSON.stringify(
-            {
-                'baseID': this.baseManager.getId(),
-                'ethAddr': signingAddr
+            if ( !accounts || !accounts[0]) {
+                alert('Can not detect ETH address from WEB3 provider.\nPlease login');
+                return;
             }
-        );
-        var signedMessage = '';
-        if (typeof web3 !== 'undefined') {
-            // alert('onSetEthSignature');
-            var msg = ethUtil.bufferToHex(new Buffer(thisMessage, 'utf8'));
+            signingAddr = accounts[0];
 
-            var params = [msg, signingAddr];
-            var method = 'personal_sign';
-            // alert("Sent message for signing via MetaMask / Mist.");
+            signingAddr = signingAddr.toLowerCase(); // always use lower casse for addresses
 
-            var sig: string;
-            await web3.currentProvider.sendAsync({ method, params, signingAddr }, function (err, result) {
-                // if (err) return $scope.notifier.danger(err)
-                // if (result.error) return $scope.notifier.danger(result.error)
-                sig = result.result;
-                const options = {
-                    address: signingAddr,
-                    msg: thisMessage,
-                    sig: sig,
-                    version: '3',
-                    signer: 'web3'
-                };
-                signedMessage = JSON.stringify(options, null, 2);
-                // alert('Successfully Signed Message with ' + signingAddr + signedMessage);
-                g_Dashboard.setState({ethSignature: sig});
-                g_Dashboard.setState({ethAddress: signingAddr});
-            });
-        }
+            var thisMessage = JSON.stringify(
+                {
+                    'baseID': this.baseManager.getId(),
+                    'ethAddr': signingAddr
+                }
+            );
+            var signedMessage = '';
+            if (typeof web3 !== 'undefined') {
 
+                var msg = ethUtil.bufferToHex(new Buffer(thisMessage, 'utf8'));
+
+                var params = [msg, signingAddr];
+                var method = 'personal_sign';
+
+
+                var sig: string;
+
+                // tslint:disable-next-line:typedef
+                web3.currentProvider.sendAsync({ method, params, signingAddr }, function (err, result) {
+                    // if (err) return $scope.notifier.danger(err)
+                    // if (result.error) return $scope.notifier.danger(result.error)
+                    sig = result.result;
+                    const options = {
+                        address: signingAddr,
+                        msg: thisMessage,
+                        sig: sig,
+                        version: '3',
+                        signer: 'web3'
+                    };
+                    signedMessage = JSON.stringify(options, null, 2);
+                    // alert('Successfully Signed Message with ' + signingAddr + signedMessage);
+                    g_Dashboard.setState({ethSignature: sig});
+                    g_Dashboard.setState({ethAddress: signingAddr});
+                });
+            }
+        })();
     }
 
     private onSetClick() {
@@ -425,8 +433,10 @@ export default class Dashboard extends React.Component<Props, State> {
     }
 
     private onDeleteClick(key: string) {
-        this.state.clientData = this.state.clientData.filter(model => model.key !== key);
+        const clientData = this.state.clientData.filter(model => model.key !== key);
+        this.setState({clientData});
 
+        // this.state.clientData = this.state.clientData.filter(model => model.key !== key);
         this.setState({});
     }
 

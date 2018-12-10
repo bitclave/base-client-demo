@@ -6,7 +6,7 @@ import AbstractHolder, { AbstractProperties, AbstractState } from './AbstractHol
 import { OfferResultAction, OfferSearch } from 'bitclave-base';
 import Button from 'reactstrap/lib/Button';
 
-interface Properties extends AbstractProperties<Offer> {
+interface Properties extends AbstractProperties<OfferSearch> {
     onComplainClick: Function;
     onGrantAccessClick: Function;
 }
@@ -32,11 +32,12 @@ export default class OfferSearchHolder extends AbstractHolder<Properties, OfferS
     private getComplainButton(model: OfferSearch): object {
         return (
             <Button
-                disabled={model.state != OfferResultAction.NONE}
+                disabled={model.state !== OfferResultAction.NONE}
                 className="m-2"
                 color="danger"
                 size="sm"
-                onClick={e => this.props.onComplainClick(model)}>
+                onClick={e => this.props.onComplainClick(model)}
+            >
                 Complain (misrepresentation)
             </Button>
         );
@@ -45,7 +46,7 @@ export default class OfferSearchHolder extends AbstractHolder<Properties, OfferS
     private getGrantAccessButton(model: OfferSearch): object {
         return (
             <Button
-                disabled={model.state != OfferResultAction.NONE}
+                disabled={model.state !== OfferResultAction.NONE}
                 className="m-2"
                 color="success"
                 size="sm"

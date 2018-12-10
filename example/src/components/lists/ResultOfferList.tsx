@@ -5,7 +5,7 @@ import OfferHolder from '../holders/OfferHolder';
 import { OfferSearch, OfferSearchResultItem } from 'bitclave-base';
 import OfferSearchHolder from '../holders/OfferSearchHolder';
 
-interface Properties extends AbstractProperties<Offer> {
+interface Properties extends AbstractProperties<OfferSearchResultItem> {
     onComplainClick: Function;
     onGrantAccessClick: Function;
 }
@@ -17,7 +17,7 @@ export default class ResultOfferList extends AbstractList<Properties, OfferSearc
             <div>
                 <OfferHolder
                     selected={false}
-                    onClick={(model: Offer, target: React.Component) => this.onClick(model, target)}
+                    onClick={(model: OfferSearchResultItem, target: React.Component) => this.onClick(model, target)}
                     model={dataItem.offer}
                     key={`offer-${position}`}
                 />
