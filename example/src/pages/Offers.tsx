@@ -28,9 +28,9 @@ export default class Offers extends React.Component<Props, State> {
 
     componentDidMount() {
         this.baseManager
-            .getOfferManager()
-            .getMyOffers()
-            .then(this.onSyncData.bind(this));
+          .getOfferManager()
+          .getMyOffers()
+          .then(this.onSyncData.bind(this));
     }
 
     render() {

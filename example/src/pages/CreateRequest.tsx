@@ -118,12 +118,20 @@ export default class CreateRequest extends React.Component<Props, State> {
                 alert('Something went wrong! =(' + JSON.stringify(reason)));
 
         this.clientCheckedFields.clear();
-        this.setState({searchClientId: '', clientFields: []});
+        const state: State = {
+            searchClientId: '',
+            clientFields: new Map<string, boolean>()
+        };
+        this.setState(state);
     }
 
     private onSearchClick() {
         this.clientCheckedFields.clear();
-        this.setState({clientFields: []});
+        const state: State = {
+            searchClientId: '',
+            clientFields: new Map<string, boolean>()
+        };
+        this.setState(state);
 
         this.baseManager.getClientRawData(this.state.searchClientId.trim())
             .then((fields: Map<string, string>) => {
@@ -138,7 +146,6 @@ export default class CreateRequest extends React.Component<Props, State> {
         return this.baseManager.getAlreadyRequestedPermissions(clientId)
             .then((permissions: Array<string>) => {
                 const result: Map<string, boolean> = new Map();
-
 
                 for (let clientField of clientFields) {
                     const checked = permissions.indexOf(clientField) > -1;

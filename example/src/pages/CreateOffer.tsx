@@ -207,7 +207,7 @@ export default class CreateOffer extends React.Component<Props, State> {
     }
 
     private onChangeWorth(value: string) {
-       const worth: number = parseFloat(value);
+        const worth: number = parseFloat(value);
 
         this.setState({worth: (worth || 0).toString()});
     }
