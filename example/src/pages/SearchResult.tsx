@@ -60,10 +60,15 @@ export default class SearchResult extends React.Component<Props, State> {
 
     private onGrantAccessClick(model: OfferSearchResultItem) {
         const grantFields: Map<string, AccessRight> = new Map();
-        Array.from(model.offer.compare.keys()).forEach(value => {
-            grantFields.set(value.toString(), AccessRight.R);
+        // Array.from(model.offer.compare.keys()).forEach(value => {
+        //     grantFields.set(value, AccessRight.R)
+        // });
+ 
+        // get user data from offerprice #0 - 0 is hard coded
+        model.offer.offerPrices[0].rules.forEach(value => {
+            grantFields.set(value.rulesKey, AccessRight.R)
         });
-
+ 
         this.baseManager.getDataReuqestManager()
             .grantAccessForOffer(
                 model.offerSearch.id,
