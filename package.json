@@ -5,7 +5,7 @@
   "main": "dist/Bitclave-Base.js",
   "scripts": {
     "start": "node app.js",
-    "build": "cd example && npm run build && cd .."
+    "postinstall": "cd example && npm run build && cd .."
   },
   "repository": {
     "type": "git",
