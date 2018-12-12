@@ -8,6 +8,7 @@ export default class Config {
         console.log(`process.env.REACT_APP_API_URL =${process.env.REACT_APP_API_URL}`);
         console.log(`process.env.BASE_NODE =${process.env.BASE_NODE}`);
         console.log(`process.env.REACT_APP_BASE_NODE =${process.env.REACT_APP_BASE_NODE}`);
+        console.log(`process.env.NODE_ENV =${process.env.NODE_ENV}`);
 
         return this.isDebug ? 'https://base2-bitclva-com.herokuapp.com' : '';
         // return this.isDebug ? 'https://base-node-staging.herokuapp.com' : '';
