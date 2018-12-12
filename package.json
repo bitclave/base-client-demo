@@ -5,6 +5,7 @@
   "main": "dist/Bitclave-Base.js",
   "scripts": {
     "start": "node app.js",
+    "build": "echo Node environment: $NODE_ENV",
     "postinstall": "cd example && npm i && npm run build && cd .."
   },
   "repository": {
