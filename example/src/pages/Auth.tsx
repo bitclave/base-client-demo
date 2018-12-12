@@ -39,6 +39,9 @@ export default class Auth extends React.Component<Props, State> {
                     <br/>
                     No UX
                 </h1>
+                <p>
+                    BASE-NODE URL: {process.env.REACT_APP_BASE_NODE ||'BASE-NODE URL is undefined' }
+                </p>
                 <Form className="m-4">
                     Change strategy for Base Node:
                     <select
