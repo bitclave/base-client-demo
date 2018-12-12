@@ -33,7 +33,7 @@
   },
   "scripts": {
     "prepare": "node utils/remove-bitcore-lib-dep.js",
-    "start": "react-scripts-ts start --env=dev",
+    "start": "node ../remove-bitcore-lib-dep.js && react-scripts-ts start --env=dev",
     "build": "echo $NODE_ENV && env-cmd .env.$NODE_ENV react-scripts-ts build",
     "build:staging": "env-cmd .env.staging react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
