@@ -6,3 +6,4 @@ app.use(express.static(__dirname + '/example/build/'));
 app.use(favicon(__dirname + '/example/build/favicon.ico'));
 
 app.listen(process.env.PORT || 3010);
+console.log `Started server of port ${process.env.PORT || 3010}`
