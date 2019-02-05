@@ -12,7 +12,7 @@ NODE_ENV=development npm i
 ```
 npm start
 ```
-- from rook directory run -  to start closer to production mode
+- from root directory run -  to start closer to production mode
 npm start
 
 
