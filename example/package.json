@@ -6,7 +6,7 @@
   },
   "private": true,
   "dependencies": {
-    "@bitclave/base-client-js": "^0.3.0",
+    "@bitclave/base-client-js": "^0.4.2",
     "@types/node": "^9.4.0",
     "@types/react": "^16.8.2",
     "@types/react-dom": "^16.8.0",
