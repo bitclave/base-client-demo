@@ -15,13 +15,13 @@ To support testing of this workflow we have bot with baseID at address 038d4a758
 # User Guide
 
 ## Login Screen
-![Alt text](https://github.com/bitclave/base-client-demo/blob/develop/images/example_login.png)
+![Alt text](https://github.com/bitclave/base-client-demo/tree/master/images/example_login.png)
 
 This screen is self-explanatory, allows for user to Sign Up, Sign In or Delete 
 - mnemonic phrase is any string 5+ characters. In future we'll make it more secure and will autogenerate it.
 
 ## Dashboard
-![Alt text](https://github.com/bitclave/base-client-demo/blob/develop/images/example_dashboard.png)
+![Alt text](https://github.com/bitclave/base-client-demo/tree/master/images/example_dashboard.png)
 
 This is the main dashboard.
 - the bottom part has a read-only section of all user data and is presented as <key,value> pairs
