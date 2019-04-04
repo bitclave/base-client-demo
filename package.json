@@ -33,7 +33,8 @@
   "scripts": {
     "prepare": "node ./utils/remove-bitcore-lib-dep.js",
     "start": "npm run prepare && react-scripts start",
-    "build": "npm run prepare && react-scripts build"
+    "build": "npm run prepare && react-scripts build",
+    "heroku-postbuild": "npm run build"
   },
   "eslintConfig": {
     "extends": "react-app"
