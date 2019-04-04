@@ -80,7 +80,7 @@ export default class BaseManager {
     }
 
     getId() {
-        return this.account.publicKey !== '0x' ? this.account.publicKey : 'undefined';
+        return this.account.publicKey !== '0x' ? this.account.publicKey : 'unknown';
     }
 
     loadClientData(): Promise<Map<string, string>> {
