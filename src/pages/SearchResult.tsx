@@ -77,7 +77,8 @@ export default class SearchResult extends React.Component<Props, State> {
                 model.offer.offerPrices[0].id
             )
             .then(() => {
-                model.offerSearch.state = OfferResultAction.ACCEPT;
+                const offerSearch = model.offerSearch.copy({state : OfferResultAction.ACCEPT})
+                model = model.copy({offerSearch:offerSearch});
                 this.setState({resultList: this.state.resultList});
             })
             .catch((e) => {
@@ -90,7 +91,8 @@ export default class SearchResult extends React.Component<Props, State> {
         this.baseManager.getSearchManager()
             .complainToSearchItem(model.offerSearch.id)
             .then(() => {
-                model.offerSearch.state = OfferResultAction.REJECT;
+                const offerSearch = model.offerSearch.copy({state : OfferResultAction.REJECT})
+                model = model.copy({offerSearch:offerSearch});
                 this.setState({resultList: this.state.resultList});
             })
             .catch((e) => {

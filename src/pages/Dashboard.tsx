@@ -376,19 +376,28 @@ export default class Dashboard extends React.Component<Props, State> {
                     'ethAddr': signingAddr
                 }
             );
+            
+            const msgParams = [
+                {
+                  type: 'string',
+                  name: 'Message',
+                  value: thisMessage
+                }
+              ];
+
             var signedMessage = '';
             if (typeof web3 !== 'undefined') {
 
                 var msg = ethUtil.bufferToHex(new Buffer(thisMessage, 'utf8'));
 
-                var params = [msg, signingAddr];
-                var method = 'personal_sign';
+                var params = [msgParams, signingAddr];
+                var method = 'eth_signTypedData';
 
 
                 var sig: string;
 
                 // tslint:disable-next-line:typedef
-                (web3.currentProvider as any).sendAsync({method, params, signingAddr}, (err: any, result: any) => {
+                (web3.currentProvider as any).connection.sendAsync({method, params, signingAddr}, (err: any, result: any) => {
                     // if (err) return $scope.notifier.danger(err)
                     // if (result.error) return $scope.notifier.danger(result.error)
                     sig = result.result;
