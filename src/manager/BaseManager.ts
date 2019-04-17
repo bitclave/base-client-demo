@@ -7,7 +7,8 @@ import Base, {
     ProfileManager,
     RepositoryStrategyType,
     SearchManager,
-    WalletManager
+    WalletManager,
+    WalletsRecords
 } from '@bitclave/base-client-js';
 import DataRequest from '@bitclave/base-client-js/dist/lib/repository/models/DataRequest';
 import { injectable } from 'inversify';
@@ -16,11 +17,21 @@ import Config from '../Config';
 @injectable()
 export default class BaseManager {
     public account: Account = new Account('0x');
+    private wallets: WalletsRecords = new WalletsRecords([], '');
+
     private base: Base;
 
     constructor() {
         this.base = new Base(Config.getBaseEndPoint(), location.hostname);
         console.log('your host name:', location.hostname);
+    }
+
+    setWallets(wallets: WalletsRecords): void {
+        this.wallets = wallets;
+    }
+
+    getWallets(): WalletsRecords {
+        return this.wallets;
     }
 
     changeStrategy(strategy: RepositoryStrategyType) {
@@ -31,14 +42,21 @@ export default class BaseManager {
         return this.getUniqueMessageForSigFromServerSide()
             .then(uniqueMessage => this.base.accountManager.registration(mnemonicPhrase, uniqueMessage))
             .then(this.sendAccountToServerSide.bind(this))
-            .then(account => this.account = account);
+            .then(account => {
+                this.setWallets(new WalletsRecords([], ''));
+                return account;
+            });
     }
 
     signIn(mnemonicPhrase: string): Promise<Account> {
         return this.getUniqueMessageForSigFromServerSide()
             .then(uniqueMessage => this.base.accountManager.checkAccount(mnemonicPhrase, uniqueMessage))
             .then(this.sendAccountToServerSide.bind(this))
-            .then(account => this.account = account);
+            .then(account => this.account = account)
+            .then(account => {
+                this.setWallets(new WalletsRecords([], ''));
+                return account;
+            });
     }
 
     public sendAccountToServerSide(account: Account): Promise<Account> {
@@ -79,7 +97,7 @@ export default class BaseManager {
         return this.base.dataRequestManager;
     }
 
-    getId() {
+    getId(): string {
         return this.account.publicKey !== '0x' ? this.account.publicKey : 'unknown';
     }
 
