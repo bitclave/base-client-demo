@@ -1,3 +1,4 @@
+import { AddrRecord, BaseAddrPair, WalletsRecords } from '@bitclave/base-client-js';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import Button from 'reactstrap/lib/Button';
@@ -16,6 +17,7 @@ import BaseManager from '../manager/BaseManager';
 import Pair from '../models/Pair';
 
 const ethUtil = require('ethereumjs-util');
+const sigUtil = require('eth-sig-util');
 
 interface Props extends RouteComponentProps<{}> {
 }
@@ -196,6 +198,12 @@ export default class Dashboard extends React.Component<Props, State> {
                     // this.state.clientData = [];
                     data.forEach((value, key) => {
                         this.state.clientData.push(new Pair(key, value));
+
+                        if (key === 'eth_wallets') {
+                            const json = JSON.parse(value);
+                            const data = (json.data as any[]).map(raw => new AddrRecord(raw.data, raw.sig));
+                            this.baseManager.setWallets(new WalletsRecords(data, json.sig));
+                        }
                     });
                     this.setState({clientDataRefreshhTrigger: 1});
                     // this.state.clientDataRefreshhTrigger = 1;
@@ -271,78 +279,58 @@ export default class Dashboard extends React.Component<Props, State> {
     }
 
     private onSetEthAddress() {
-        // alert('onSetEthAddress');
         const {ethAddress, ethSignature} = this.state;
-        if (ethAddress == null
-            || ethAddress.trim().length === 0
-            || ethAddress == null
-            || ethAddress.trim().length === 0) {
+        if (ethAddress == null || ethAddress.trim().length === 0) {
             alert('The ethAddress must not be empty');
             return;
         }
-        var pos = this.state.clientData.findIndex(model => model.key === 'eth_wallets');
+        const pos = this.state.clientData.findIndex(model => model.key === 'eth_wallets');
 
-        var newAddr = {
-            'baseID': this.baseManager.getId(),
-            'ethAddr': ethAddress
-        };
-        var newAddrRecord = {
-            'data': JSON.stringify(newAddr),
-            'sig': ethSignature
-        };
+        const newAddr = new BaseAddrPair(this.baseManager.getId(), ethAddress);
+        const newAddrRecord = new AddrRecord(newAddr, ethSignature);
+
+       if (this.baseManager.getWallets().data.find(value => value.sig === newAddrRecord.sig)) {
+           alert('only unique wallet can be set');
+           return;
+       }
+
+        this.baseManager.getWallets().data.push(newAddrRecord);
+        const strJson = JSON.stringify(this.baseManager.getWallets());
+
         if (pos >= 0) {
-            var wallets = JSON.parse(this.state.clientData[pos].value);
-            wallets.data.push(newAddrRecord);
-            wallets.sig = '';
-            this.state.clientData[pos].value = JSON.stringify(wallets);
+            this.state.clientData[pos].value = strJson;
+
         } else {
-            this.state.clientData.push(new Pair('eth_wallets', JSON.stringify(
-                {
-                    'data': [newAddrRecord],
-                    'sig': ''
-                })));
-            pos = this.state.clientData.length - 1;
+            this.state.clientData.push(new Pair('eth_wallets', strJson));
         }
-
-        // var msg = JSON.parse(this.state.clientData[pos].value);
-        // var res = this.baseManager.getProfileManager().validateEthWallets(
-        //     this.state.clientData[pos].key, msg, this.baseManager.getId());
-        // alert(JSON.stringify(res));
-
         this.setState({ethAddress: '', ethSignature: ''});
     }
 
     private onVerifyWallets() {
-        // fixme
-        // var pos = this.state.clientData.findIndex(model => model.key === 'eth_wallets');
-        // if (pos >= 0) {
-        //     var msg = JSON.parse(this.state.clientData[pos].value);
-        //     var res = this.baseManager
-        //         .getProfileManager()
-        //         .validateEthWallets( this.state.clientData[pos].key, msg, this.baseManager.getId());
-        //
-        //     alert(JSON.stringify(res));
-        // } else {
-        //     alert('no eth_wallets found');
-        // }
+        const pos = this.state.clientData.findIndex(model => model.key === 'eth_wallets');
+        if (pos >= 0) {
+            const res = this.baseManager
+                .getWalletManager()
+                .validateWallets(this.baseManager.getWallets());
+            alert(res);
+
+        } else {
+            alert('no eth_wallets found');
+        }
     }
 
     private async onSignWallets() {
-        var pos = this.state.clientData.findIndex(model => model.key === 'eth_wallets');
+        const pos = this.state.clientData.findIndex(model => model.key === 'eth_wallets');
         if (pos >= 0) {
-            var msg = JSON.parse(this.state.clientData[pos].value);
             try {
-                var res = await this.baseManager
+                const wallets = await this.baseManager
                     .getWalletManager()
-                    .createWalletsRecords(msg.data, this.baseManager.getId());
+                    .createWalletsRecords(this.baseManager.getWallets().data, this.baseManager.getId());
 
-                msg.sig = res.sig;
-                console.log('wallet signature', msg.sig);
-                this.state.clientData[pos].value = JSON.stringify(msg);
+                this.baseManager.setWallets(wallets);
                 alert('eth_wallets signed');
-                console.log('full wallet structure:');
-                console.log(this.state.clientData[pos].value);
             } catch (err) {
+                console.log(err);
                 alert('exception in onSignWallets: ' + err);
             }
 
@@ -352,7 +340,7 @@ export default class Dashboard extends React.Component<Props, State> {
     }
 
     private onSetEthSignature() {
-        var signingAddr: string = '';
+        let signingAddr: string = '';
 
         if (typeof web3 === 'undefined') {
             alert('WEB3 is not detected');
@@ -368,49 +356,25 @@ export default class Dashboard extends React.Component<Props, State> {
             }
             signingAddr = accounts[0];
 
-            signingAddr = signingAddr.toLowerCase(); // always use lower casse for addresses
+            signingAddr = signingAddr.toLowerCase(); // always use lower case for addresses
 
-            var thisMessage = JSON.stringify(
-                {
-                    'baseID': this.baseManager.getId(),
-                    'ethAddr': signingAddr
-                }
-            );
-            
-            const msgParams = [
-                {
-                  type: 'string',
-                  name: 'Message',
-                  value: thisMessage
-                }
-              ];
+            const message = JSON.stringify(new BaseAddrPair(this.baseManager.getId(), signingAddr));
 
-            var signedMessage = '';
             if (typeof web3 !== 'undefined') {
 
-                var msg = ethUtil.bufferToHex(new Buffer(thisMessage, 'utf8'));
+                const msg = ethUtil.bufferToHex(Buffer.from(message, 'utf8'));
 
-                var params = [msgParams, signingAddr];
-                var method = 'eth_signTypedData';
+                const params = [msg, signingAddr];
+                const method = 'personal_sign';
 
-
-                var sig: string;
-
-                // tslint:disable-next-line:typedef
-                (web3.currentProvider as any).connection.sendAsync({method, params, signingAddr}, (err: any, result: any) => {
+                (web3.currentProvider as any).connection.sendAsync({
+                    method,
+                    params,
+                    signingAddr
+                }, (err: any, result: any) => {
                     // if (err) return $scope.notifier.danger(err)
                     // if (result.error) return $scope.notifier.danger(result.error)
-                    sig = result.result;
-                    const options = {
-                        address: signingAddr,
-                        msg: thisMessage,
-                        sig: sig,
-                        version: '3',
-                        signer: 'web3'
-                    };
-                    signedMessage = JSON.stringify(options, null, 2);
-                    // alert('Successfully Signed Message with ' + signingAddr + signedMessage);
-                    this.setState({ethSignature: sig});
+                    this.setState({ethSignature: result.result});
                     this.setState({ethAddress: signingAddr});
                 });
             }
