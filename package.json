@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@bitclave/base-client-js": "^0.4.15",
-    "@types/node": "^11.13.0",
+    "@bitclave/base-client-js": "^0.4.17",
+    "@types/node": "^11.13.5",
     "@types/react": "^16.8.10",
     "@types/react-dom": "^16.8.3",
     "@types/react-router-dom": "^4.3.1",

@@ -1,4 +1,4 @@
-import { AddrRecord, BaseAddrPair, WalletsRecords } from '@bitclave/base-client-js';
+import { AddrRecord, BaseAddrPair, WalletsRecords, WalletUtils } from '@bitclave/base-client-js';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import Button from 'reactstrap/lib/Button';
@@ -309,10 +309,16 @@ export default class Dashboard extends React.Component<Props, State> {
     private onVerifyWallets() {
         const pos = this.state.clientData.findIndex(model => model.key === 'eth_wallets');
         if (pos >= 0) {
-            const res = this.baseManager
-                .getWalletManager()
-                .validateWallets(this.baseManager.getWallets());
-            alert(res);
+            // const res = this.baseManager
+            //     .getWalletManager()
+            //     .validateWallets(this.baseManager.getWallets());
+
+            const res = WalletUtils.validateWallets(
+                'eth_wallets',
+                this.baseManager.getWallets(),
+                this.baseManager.getId()
+            )
+            alert(JSON.stringify(res));
 
         } else {
             alert('no eth_wallets found');
@@ -328,6 +334,9 @@ export default class Dashboard extends React.Component<Props, State> {
                     .createWalletsRecords(this.baseManager.getWallets().data, this.baseManager.getId());
 
                 this.baseManager.setWallets(wallets);
+                const strJson = JSON.stringify(this.baseManager.getWallets());
+                this.state.clientData[pos].value = strJson;
+
                 alert('eth_wallets signed');
             } catch (err) {
                 console.log(err);
