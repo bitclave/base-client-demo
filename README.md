@@ -34,6 +34,10 @@ This is the main dashboard.
     - When eth_walelts structure is propery signed the response shall be something like
     {"rc":0,"err":"","details":[0,0]}
   - Sign Wallets - will sign the eth_wallets structure
+
+# Developer guide
+- Run against staging DB
+  - REACT_APP_BASE_NODE=https://base2-bitclva-com.herokuapp.com npm run start
   
 
 
