@@ -1,6 +1,7 @@
 import Base, {
     AccessRight,
     Account,
+    CryptoWallets,
     DataRequestManager,
     Offer,
     OfferManager,
@@ -8,16 +9,15 @@ import Base, {
     RepositoryStrategyType,
     SearchManager,
     WalletManager,
-    WalletsRecords
+    DataRequest,
 } from '@bitclave/base-client-js';
-import DataRequest from '@bitclave/base-client-js/dist/lib/repository/models/DataRequest';
 import { injectable } from 'inversify';
 import Config from '../Config';
 
 @injectable()
 export default class BaseManager {
     public account: Account = new Account('0x');
-    private wallets: WalletsRecords = new WalletsRecords([], '');
+    private wallets: CryptoWallets = new CryptoWallets([], [], []);
 
     private base: Base;
 
@@ -26,11 +26,11 @@ export default class BaseManager {
         console.log('your host name:', location.hostname);
     }
 
-    setWallets(wallets: WalletsRecords): void {
+    setWallets(wallets: CryptoWallets): void {
         this.wallets = wallets;
     }
 
-    getWallets(): WalletsRecords {
+    getWallets(): CryptoWallets {
         return this.wallets;
     }
 
@@ -43,7 +43,7 @@ export default class BaseManager {
             .then(uniqueMessage => this.base.accountManager.registration(mnemonicPhrase, uniqueMessage))
             .then(this.sendAccountToServerSide.bind(this))
             .then(account => {
-                this.setWallets(new WalletsRecords([], ''));
+                this.setWallets(new CryptoWallets([], [], []));
                 return account;
             });
     }
@@ -54,7 +54,7 @@ export default class BaseManager {
             .then(this.sendAccountToServerSide.bind(this))
             .then(account => this.account = account)
             .then(account => {
-                this.setWallets(new WalletsRecords([], ''));
+                this.setWallets(new CryptoWallets([], [], []));
                 return account;
             });
     }
@@ -71,10 +71,9 @@ export default class BaseManager {
             .then(phrase => phrase);
     }
 
-    unsubscribe(mnemonicPhrase: string): Promise<Account> {
+    unsubscribe(mnemonicPhrase: string): Promise<void> {
         return this.base.accountManager
-            .unsubscribe()
-            .then(account => this.account = account);
+            .unsubscribe();
     }
 
     getOfferManager(): OfferManager {

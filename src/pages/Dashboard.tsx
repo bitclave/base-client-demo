@@ -1,4 +1,10 @@
-import { AddrRecord, BaseAddrPair, WalletsRecords, WalletUtils } from '@bitclave/base-client-js';
+import {
+    CryptoWalletsData,
+    EthCryptoWallet,
+    EthWalletData,
+    WalletManagerImpl,
+    WalletUtils
+} from '@bitclave/base-client-js';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import Button from 'reactstrap/lib/Button';
@@ -199,10 +205,9 @@ export default class Dashboard extends React.Component<Props, State> {
                     data.forEach((value, key) => {
                         this.state.clientData.push(new Pair(key, value));
 
-                        if (key === 'eth_wallets') {
+                        if (key === WalletManagerImpl.DATA_KEY_ETH_WALLETS) {
                             const json = JSON.parse(value);
-                            const data = (json.data as any[]).map(raw => new AddrRecord(raw.data, raw.sig));
-                            this.baseManager.setWallets(new WalletsRecords(data, json.sig));
+                            this.baseManager.setWallets(CryptoWalletsData.fromJson(json).data);
                         }
                     });
                     this.setState({clientDataRefreshhTrigger: 1});
@@ -284,41 +289,40 @@ export default class Dashboard extends React.Component<Props, State> {
             alert('The ethAddress must not be empty');
             return;
         }
-        const pos = this.state.clientData.findIndex(model => model.key === 'eth_wallets');
+        const pos = this.state.clientData.findIndex(model => model.key === WalletManagerImpl.DATA_KEY_ETH_WALLETS);
 
-        const newAddr = new BaseAddrPair(this.baseManager.getId(), ethAddress);
-        const newAddrRecord = new AddrRecord(newAddr, ethSignature);
+        const ethCryptoWallet = new EthCryptoWallet(this.baseManager.getId(), ethAddress);
+        const ethWalletData = new EthWalletData(ethCryptoWallet, ethSignature);
 
-       if (this.baseManager.getWallets().data.find(value => value.sig === newAddrRecord.sig)) {
-           alert('only unique wallet can be set');
-           return;
-       }
+        if (this.baseManager.getWallets().eth.find(value => value.sig === ethWalletData.sig)) {
+            alert('only unique wallet can be set');
+            return;
+        }
 
-        this.baseManager.getWallets().data.push(newAddrRecord);
+        this.baseManager.getWallets().eth.push(ethWalletData);
         const strJson = JSON.stringify(this.baseManager.getWallets());
 
         if (pos >= 0) {
             this.state.clientData[pos].value = strJson;
 
         } else {
-            this.state.clientData.push(new Pair('eth_wallets', strJson));
+            this.state.clientData.push(new Pair(WalletManagerImpl.DATA_KEY_ETH_WALLETS, strJson));
         }
         this.setState({ethAddress: '', ethSignature: ''});
     }
 
-    private onVerifyWallets() {
-        const pos = this.state.clientData.findIndex(model => model.key === 'eth_wallets');
+    private async onVerifyWallets() {
+        const pos = this.state.clientData.findIndex(model => model.key === WalletManagerImpl.DATA_KEY_ETH_WALLETS);
         if (pos >= 0) {
-            // const res = this.baseManager
-            //     .getWalletManager()
-            //     .validateWallets(this.baseManager.getWallets());
+            const json = JSON.parse(this.state.clientData[pos].value);
+            const signedCryptoWallets = CryptoWalletsData.fromJson(json);
 
-            const res = WalletUtils.validateWallets(
-                'eth_wallets',
-                this.baseManager.getWallets(),
-                this.baseManager.getId()
-            )
-            alert(JSON.stringify(res));
+            const res = WalletUtils.validateWalletsData(
+                this.baseManager.getId(),
+                signedCryptoWallets,
+            );
+
+            alert(res.length === 0 ? 'verify is OK' : JSON.stringify(res));
 
         } else {
             alert('no eth_wallets found');
@@ -326,18 +330,20 @@ export default class Dashboard extends React.Component<Props, State> {
     }
 
     private async onSignWallets() {
-        const pos = this.state.clientData.findIndex(model => model.key === 'eth_wallets');
+        const pos = this.state.clientData.findIndex(model => model.key === WalletManagerImpl.DATA_KEY_ETH_WALLETS);
         if (pos >= 0) {
             try {
+                const signedCryptoWallets = CryptoWalletsData.fromJson(JSON.parse(this.state.clientData[pos].value));
+
                 const wallets = await this.baseManager
                     .getWalletManager()
-                    .createWalletsRecords(this.baseManager.getWallets().data, this.baseManager.getId());
+                    .createCryptoWalletsData(signedCryptoWallets.data);
 
-                this.baseManager.setWallets(wallets);
-                const strJson = JSON.stringify(this.baseManager.getWallets());
-                this.state.clientData[pos].value = strJson;
+                this.state.clientData[pos].value = JSON.stringify(wallets);
 
-                alert('eth_wallets signed');
+                this.setState({});
+
+                alert(`${WalletManagerImpl.DATA_KEY_ETH_WALLETS} signed`);
             } catch (err) {
                 console.log(err);
                 alert('exception in onSignWallets: ' + err);
@@ -367,7 +373,7 @@ export default class Dashboard extends React.Component<Props, State> {
 
             signingAddr = signingAddr.toLowerCase(); // always use lower case for addresses
 
-            const message = JSON.stringify(new BaseAddrPair(this.baseManager.getId(), signingAddr));
+            const message = JSON.stringify(new EthCryptoWallet(this.baseManager.getId(), signingAddr));
 
             if (typeof web3 !== 'undefined') {
 
