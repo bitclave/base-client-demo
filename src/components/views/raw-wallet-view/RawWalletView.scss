@@ -1,0 +1,54 @@
+.RawWalletView {
+}
+
+.RawWalletView__address_disabled {
+    background-color: #e9ecef;
+    pointer-events: none;
+}
+
+.RawWalletView__message_invisible {
+    display: none;
+}
+
+.RawWalletView__message__copy {
+    position: relative;
+    font-size: 12px;
+    width: 80px;
+    background-color: #00000017;
+    border-radius: 5px;
+    padding: 0 4px;
+    cursor: pointer;
+    margin-top: -25px;
+    margin-right: 10px;
+    float: right;
+}
+
+.RawWalletView__signature {
+    min-height: 100px;
+}
+
+.RawWalletView__signature_disabled {
+   @extend .RawWalletView__signature;
+
+    background-color: #e9ecef;
+    pointer-events: none;
+}
+
+.RawWalletView__errors {
+    color: red;
+    padding-bottom: 10px;
+}
+
+.RawWalletView__buttons {
+    text-align: right;
+}
+
+.RawWalletView__buttons {
+    .btn {
+        margin-right: 10px;
+    }
+
+    :last-child {
+        margin-right: 0;
+    }
+}
