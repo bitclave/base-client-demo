@@ -24,7 +24,6 @@ import { RawWalletView } from '../components/views/raw-wallet-view/RawWalletView
 import { Injections, lazyInject } from '../Injections';
 import BaseManager from '../manager/BaseManager';
 import Pair from '../models/Pair';
-import { RawWallet } from '../models/RawWallet';
 import './Dashboard.scss';
 
 interface Props extends RouteComponentProps<{}> {
@@ -37,7 +36,6 @@ interface State {
     numberResponses: number;
     clientDataRefreshhTrigger: number;
     clientData: Array<Pair<string, string>>;
-    rawWallet: RawWallet;
     showRawWallet: boolean,
     rawWalletType: 'eth-metamask' | 'eth' | 'btc' | 'app'
 }
@@ -56,7 +54,6 @@ export default class Dashboard extends React.Component<Props, State> {
             numberResponses: 0,
             clientDataRefreshhTrigger: 0,
             clientData: [],
-            rawWallet: new RawWallet(this.baseManager.getId(), '', ''),
             showRawWallet: false,
             rawWalletType: 'eth-metamask'
         };
@@ -191,8 +188,7 @@ export default class Dashboard extends React.Component<Props, State> {
     private onShowRawWalletClick(type: 'eth-metamask' | 'eth' | 'btc' | 'app'): void {
         this.setState({
             showRawWallet: true,
-            rawWalletType: type,
-            rawWallet: new RawWallet(this.baseManager.getId(), '', '')
+            rawWalletType: type
         })
     }
 
@@ -215,14 +211,10 @@ export default class Dashboard extends React.Component<Props, State> {
 
         return (
             <RawWalletView
-                rawWallet={this.state.rawWallet}
+                baseId={this.baseManager.getId()}
                 type={this.state.rawWalletType}
                 onAcceptClick={(wallet => this.onAcceptRawWallet(wallet))}
-                onCancelClick={() =>
-                    this.setState({
-                        showRawWallet: false,
-                        rawWallet: new RawWallet(this.baseManager.getId(), '', '')
-                    })
+                onCancelClick={() => this.setState({showRawWallet: false})
                 }
             />
         )
@@ -264,10 +256,7 @@ export default class Dashboard extends React.Component<Props, State> {
             this.state.clientData.push(new Pair(WalletManagerImpl.DATA_KEY_ETH_WALLETS, strJson));
         }
 
-        this.setState({
-            showRawWallet: false,
-            rawWallet: new RawWallet(this.baseManager.getId(), '', '')
-        });
+        this.setState({showRawWallet: false});
     }
 
     private onChangeKey(key: string) {

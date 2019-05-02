@@ -1,22 +1,19 @@
 import {
     AppCryptoWallet,
+    AppWalletData,
     BtcCryptoWallet,
     BtcWalletData,
     CryptoWallet,
     EthCryptoWallet,
     EthWalletData,
     SupportSignedMessageData,
-    WalletUtils,
-    AppWalletData
+    WalletUtils
 } from '@bitclave/base-client-js';
 import * as React from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { FormGroup, Input, InputGroup, InputGroupAddon, Label } from 'reactstrap';
 import Button from 'reactstrap/lib/Button';
 import Web3 from 'web3';
-import { Injections, lazyInject } from '../../../Injections';
-import BaseManager from '../../../manager/BaseManager';
-import { RawWallet } from '../../../models/RawWallet';
 import './RawWalletView.scss';
 
 const ethUtil = require('ethereumjs-util');
@@ -37,11 +34,11 @@ window.addEventListener('load', function () {
 
 
 interface Props {
-    rawWallet: RawWallet;
+    baseId: string;
 
     type: 'eth-metamask' | 'eth' | 'btc' | 'app';
 
-    onAcceptClick: (rawWallet: SupportSignedMessageData<CryptoWallet>) => void;
+    onAcceptClick: (signedWallet: SupportSignedMessageData<CryptoWallet>) => void;
 
     onCancelClick: () => void;
 }
@@ -55,15 +52,12 @@ interface State {
 
 export class RawWalletView extends React.Component<Props, State> {
 
-    @lazyInject(Injections.BASE_MANAGER)
-    baseManager: BaseManager;
-
     constructor(props: Props, context: any) {
         super(props, context);
 
         this.state = {
             address: '',
-            message: JSON.stringify(new CryptoWallet(props.rawWallet.baseId, props.rawWallet.address)),
+            message: JSON.stringify(new CryptoWallet(props.baseId, '')),
             signature: '',
             errors: null
         }
@@ -76,7 +70,7 @@ export class RawWalletView extends React.Component<Props, State> {
     public componentWillReceiveProps(nextProps: Readonly<Props>, nextContext: any): void {
         this.setState({
             address: '',
-            message: JSON.stringify(new CryptoWallet(nextProps.rawWallet.baseId, nextProps.rawWallet.address)),
+            message: JSON.stringify(new CryptoWallet(nextProps.baseId, '')),
             signature: '',
             errors: null
         })
@@ -93,7 +87,7 @@ export class RawWalletView extends React.Component<Props, State> {
                         onChange={(e) => {
                             const address = e.target.value.toString();
                             const msg = JSON.stringify(
-                                new CryptoWallet(this.props.rawWallet.baseId, address)
+                                new CryptoWallet(this.props.baseId, address)
                             );
                             this.setState({address: e.target.value.toString(), message: msg})
                         }}
@@ -155,8 +149,7 @@ export class RawWalletView extends React.Component<Props, State> {
     }
 
     private onAcceptClick(): void {
-        const baseId = this.props.rawWallet.baseId;
-        const type = this.props.type;
+        const {baseId, type} = this.props;
         const {address, message, signature} = this.state;
         let wallet: SupportSignedMessageData<CryptoWallet>;
 
@@ -236,7 +229,7 @@ export class RawWalletView extends React.Component<Props, State> {
 
             signingAddr = signingAddr.toLowerCase(); // always use lower case for addresses
 
-            const message = JSON.stringify(new EthCryptoWallet(this.props.rawWallet.baseId, signingAddr));
+            const message = JSON.stringify(new EthCryptoWallet(this.props.baseId, signingAddr));
 
             if (typeof web3 !== 'undefined') {
 
