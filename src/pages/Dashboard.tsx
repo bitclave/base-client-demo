@@ -1,7 +1,10 @@
 import {
+    AppWalletData,
+    BtcWalletData,
+    CryptoWallet,
     CryptoWalletsData,
-    EthCryptoWallet,
     EthWalletData,
+    SupportSignedMessageData,
     WalletManagerImpl,
     WalletUtils
 } from '@bitclave/base-client-js';
@@ -15,15 +18,14 @@ import Form from 'reactstrap/lib/Form';
 import FormGroup from 'reactstrap/lib/FormGroup';
 import Input from 'reactstrap/lib/Input';
 import Row from 'reactstrap/lib/Row';
-import Web3 from 'web3';
 import PairItemHolder from '../components/holders/PairItemHolder';
 import ClientDataList from '../components/lists/SimplePairList';
+import { RawWalletView } from '../components/views/raw-wallet-view/RawWalletView';
 import { Injections, lazyInject } from '../Injections';
 import BaseManager from '../manager/BaseManager';
 import Pair from '../models/Pair';
-
-const ethUtil = require('ethereumjs-util');
-const sigUtil = require('eth-sig-util');
+import { RawWallet } from '../models/RawWallet';
+import './Dashboard.scss';
 
 interface Props extends RouteComponentProps<{}> {
 }
@@ -31,27 +33,14 @@ interface Props extends RouteComponentProps<{}> {
 interface State {
     inputKey: string;
     inputValue: string;
-    ethAddress: string;
-    ethSignature: string;
     numberRequests: number;
     numberResponses: number;
     clientDataRefreshhTrigger: number;
     clientData: Array<Pair<string, string>>;
+    rawWallet: RawWallet;
+    showRawWallet: boolean,
+    rawWalletType: 'eth-metamask' | 'eth' | 'btc' | 'app'
 }
-
-var web3: Web3;
-
-window.addEventListener('load', function () {
-    if (window && typeof (window as any).web3 !== 'undefined') {
-        // Use Mist/MetaMask's provider.
-        try {
-            web3 = new Web3((window as any).web3.currentProvider);
-        } catch (err) {
-            console.log(err);
-        }
-        console.log('Injected web3 detected.');
-    }
-});
 
 export default class Dashboard extends React.Component<Props, State> {
 
@@ -63,24 +52,23 @@ export default class Dashboard extends React.Component<Props, State> {
         this.state = {
             inputKey: '',
             inputValue: '',
-            ethAddress: '',
-            ethSignature: '',
             numberRequests: 0,
             numberResponses: 0,
             clientDataRefreshhTrigger: 0,
-            clientData: []
+            clientData: [],
+            rawWallet: new RawWallet(this.baseManager.getId(), '', ''),
+            showRawWallet: false,
+            rawWalletType: 'eth-metamask'
         };
     }
 
     componentDidMount() {
         this.getDataList();
-        this.setState({ethSignature: ''});
-        // this.state.ethSignature = '';
     }
 
     render() {
         return (
-            <div className="text-white h-100">
+            <div className="Dashboard text-white">
                 <Button className="m-2 float-right" color="danger" size="sm" onClick={() => this.onLogoutClick()}>
                     Logout
                 </Button>
@@ -105,58 +93,39 @@ export default class Dashboard extends React.Component<Props, State> {
 
                 <div className="m-2 text-white">your id: {this.baseManager.getId()}</div>
 
-                <Container className="h-100 align-items-center">
-                    <div className="row h-100 justify-content-center align-items-center">
-                        <Form>
-                            <FormGroup>
-                                <Row>
-                                    <Col className="p-0" xs="1" sm="2">
-                                        <Input
-                                            value={'eth_address'} readOnly
-                                        />
-                                    </Col>
-                                    <Col className="p-0" xs="1" sm="5">
-                                        <Input
-                                            value={this.state.ethAddress || ''}
-                                            placeholder="eth address"
-                                            onChange={(e) => this.onChangeEthAddress(e.target.value)}
-                                        />
-                                    </Col>
-                                    <Col className="p-0" xs="1" sm="5">
-                                        <Input
-                                            value={this.state.ethSignature || ''}
-                                            placeholder="signature"
-                                            onChange={(e) => this.onChangeEthSignature(e.target.value)}
-                                        />
-                                    </Col>
-                                </Row>
-                                <Row><p/></Row>
-                                <Row>
-                                    <Col xs="3" sm="3">
-                                        <Button color="primary" onClick={() => this.onSetEthSignature()}>
-                                            Sign w/Web3
-                                        </Button>
-                                    </Col>
-                                    <Col xs="3" sm="3">
-                                        <Button color="primary" onClick={() => this.onSetEthAddress()}>
-                                            Set Single
-                                        </Button>
-                                    </Col>
+                <div className="Dashboard__add__wallets">
+                    <div>
+                        <ButtonGroup className="m-2 btn-group-toggle justify-content-center">
+                            <Button color="primary" onClick={() => this.onShowRawWalletClick('eth-metamask')}>
+                                Eth wallet with Metamask
+                            </Button>
+                            <Button color="primary" onClick={() => this.onShowRawWalletClick('eth')}>
+                                Eth wallet
+                            </Button>
+                            <Button color="primary" onClick={() => this.onShowRawWalletClick('btc')}>
+                                Btc wallet
+                            </Button>
+                            <Button color="primary" onClick={() => this.onShowRawWalletClick('app')}>
+                                App wallet
+                            </Button>
+                        </ButtonGroup>
+                    </div>
 
-                                    <Col xs="3" sm="3">
-                                        <Button color="primary" onClick={() => this.onVerifyWallets()}>
-                                            Verify
-                                        </Button>
-                                    </Col>
-                                    <Col xs="3" sm="3">
-                                        <Button color="primary" onClick={() => this.onSignWallets()}>
-                                            Sign Wallets
-                                        </Button>
-                                    </Col>
-                                </Row>
-                                <Row><p/></Row>
-                                <Row><p/></Row>
-                            </FormGroup>
+                    {this.prepareRawWalletBlock()}
+
+                    <div className="Dashboard__raw-wallet__buttons">
+                        <Button color="primary" onClick={() => this.onSignWallets()}>
+                            Sign Wallets
+                        </Button>
+                        <Button color="primary" onClick={() => this.onVerifyWallets()}>
+                            Verify
+                        </Button>
+                    </div>
+                </div>
+
+                <Container className="align-items-center">
+                    <div className="row justify-content-center align-items-center">
+                        <Form>
                             <FormGroup>
                                 <Row>
                                     <Col className="p-0" xs="6" sm="4">
@@ -219,16 +188,90 @@ export default class Dashboard extends React.Component<Props, State> {
             }).catch(response => console.log('message: ' + JSON.stringify(response)));
     }
 
+    private onShowRawWalletClick(type: 'eth-metamask' | 'eth' | 'btc' | 'app'): void {
+        this.setState({
+            showRawWallet: true,
+            rawWalletType: type,
+            rawWallet: new RawWallet(this.baseManager.getId(), '', '')
+        })
+    }
+
+    private prepareRawWalletBlock(): React.ReactNode {
+        if (!this.state.showRawWallet) {
+            return null;
+        }
+
+        return (
+            <div className="Dashboard__raw-wallet__container">
+                {this.prepareRawWalletView()}
+            </div>
+        )
+    }
+
+    private prepareRawWalletView() {
+        if (!this.state.showRawWallet) {
+            return null;
+        }
+
+        return (
+            <RawWalletView
+                rawWallet={this.state.rawWallet}
+                type={this.state.rawWalletType}
+                onAcceptClick={(wallet => this.onAcceptRawWallet(wallet))}
+                onCancelClick={() =>
+                    this.setState({
+                        showRawWallet: false,
+                        rawWallet: new RawWallet(this.baseManager.getId(), '', '')
+                    })
+                }
+            />
+        )
+    }
+
+    private async onAcceptRawWallet(signedWallet: SupportSignedMessageData<CryptoWallet>): Promise<void> {
+        const pos = this.state.clientData
+            .findIndex(model => model.key === WalletManagerImpl.DATA_KEY_ETH_WALLETS);
+
+        const existedWallets = this.baseManager.getWallets().eth
+            .concat(this.baseManager.getWallets().btc)
+            .concat(this.baseManager.getWallets().app);
+
+        if (existedWallets.find(value => value.data.address === signedWallet.data.address)) {
+            alert('only unique wallet can be set');
+            return;
+        }
+
+        if (signedWallet instanceof EthWalletData) {
+            this.baseManager.getWallets().eth.push(signedWallet);
+
+        } else if (signedWallet instanceof BtcWalletData) {
+            this.baseManager.getWallets().btc.push(signedWallet);
+
+        } else if (signedWallet instanceof AppWalletData) {
+            this.baseManager.getWallets().app.push(signedWallet);
+        }
+
+        const wallets = await this.baseManager
+            .getWalletManager()
+            .createCryptoWalletsData(this.baseManager.getWallets());
+
+        const strJson = JSON.stringify(wallets);
+
+        if (pos >= 0) {
+            this.state.clientData[pos].value = strJson;
+
+        } else {
+            this.state.clientData.push(new Pair(WalletManagerImpl.DATA_KEY_ETH_WALLETS, strJson));
+        }
+
+        this.setState({
+            showRawWallet: false,
+            rawWallet: new RawWallet(this.baseManager.getId(), '', '')
+        });
+    }
+
     private onChangeKey(key: string) {
         this.setState({inputKey: key});
-    }
-
-    private onChangeEthAddress(key: string) {
-        this.setState({ethAddress: key});
-    }
-
-    private onChangeEthSignature(key: string) {
-        this.setState({ethSignature: key});
     }
 
     private onChangeValue(value: string) {
@@ -283,34 +326,6 @@ export default class Dashboard extends React.Component<Props, State> {
             .catch(e => alert('Something went wrong! data not saved! =(') + e);
     }
 
-    private onSetEthAddress() {
-        const {ethAddress, ethSignature} = this.state;
-        if (ethAddress == null || ethAddress.trim().length === 0) {
-            alert('The ethAddress must not be empty');
-            return;
-        }
-        const pos = this.state.clientData.findIndex(model => model.key === WalletManagerImpl.DATA_KEY_ETH_WALLETS);
-
-        const ethCryptoWallet = new EthCryptoWallet(this.baseManager.getId(), ethAddress);
-        const ethWalletData = new EthWalletData(ethCryptoWallet, ethSignature);
-
-        if (this.baseManager.getWallets().eth.find(value => value.sig === ethWalletData.sig)) {
-            alert('only unique wallet can be set');
-            return;
-        }
-
-        this.baseManager.getWallets().eth.push(ethWalletData);
-        const strJson = JSON.stringify(this.baseManager.getWallets());
-
-        if (pos >= 0) {
-            this.state.clientData[pos].value = strJson;
-
-        } else {
-            this.state.clientData.push(new Pair(WalletManagerImpl.DATA_KEY_ETH_WALLETS, strJson));
-        }
-        this.setState({ethAddress: '', ethSignature: ''});
-    }
-
     private async onVerifyWallets() {
         const pos = this.state.clientData.findIndex(model => model.key === WalletManagerImpl.DATA_KEY_ETH_WALLETS);
         if (pos >= 0) {
@@ -352,48 +367,6 @@ export default class Dashboard extends React.Component<Props, State> {
         } else {
             alert('no eth_wallets found');
         }
-    }
-
-    private onSetEthSignature() {
-        let signingAddr: string = '';
-
-        if (typeof web3 === 'undefined') {
-            alert('WEB3 is not detected');
-            return;
-        }
-
-        (async () => {
-            const accounts = await web3.eth.getAccounts();
-
-            if (!accounts || !accounts[0]) {
-                alert('Can not detect ETH address from WEB3 provider.\nPlease login');
-                return;
-            }
-            signingAddr = accounts[0];
-
-            signingAddr = signingAddr.toLowerCase(); // always use lower case for addresses
-
-            const message = JSON.stringify(new EthCryptoWallet(this.baseManager.getId(), signingAddr));
-
-            if (typeof web3 !== 'undefined') {
-
-                const msg = ethUtil.bufferToHex(Buffer.from(message, 'utf8'));
-
-                const params = [msg, signingAddr];
-                const method = 'personal_sign';
-
-                (web3.currentProvider as any).connection.sendAsync({
-                    method,
-                    params,
-                    signingAddr
-                }, (err: any, result: any) => {
-                    // if (err) return $scope.notifier.danger(err)
-                    // if (result.error) return $scope.notifier.danger(result.error)
-                    this.setState({ethSignature: result.result});
-                    this.setState({ethAddress: signingAddr});
-                });
-            }
-        })();
     }
 
     private onSetClick() {
