@@ -2,6 +2,7 @@ import Base, {
     AccessRight,
     Account,
     CryptoWallets,
+    DataRequest,
     DataRequestManager,
     Offer,
     OfferManager,
@@ -9,7 +10,6 @@ import Base, {
     RepositoryStrategyType,
     SearchManager,
     WalletManager,
-    DataRequest,
 } from '@bitclave/base-client-js';
 import { injectable } from 'inversify';
 import Config from '../Config';
@@ -42,28 +42,20 @@ export default class BaseManager {
         return this.getUniqueMessageForSigFromServerSide()
             .then(uniqueMessage => this.base.accountManager.registration(mnemonicPhrase, uniqueMessage))
             .then(this.sendAccountToServerSide.bind(this))
-            .then(account => {
-                this.setWallets(new CryptoWallets([], [], []));
-                return account;
-            });
     }
 
     signIn(mnemonicPhrase: string): Promise<Account> {
         return this.getUniqueMessageForSigFromServerSide()
             .then(uniqueMessage => this.base.accountManager.checkAccount(mnemonicPhrase, uniqueMessage))
             .then(this.sendAccountToServerSide.bind(this))
-            .then(account => this.account = account)
-            .then(account => {
-                this.setWallets(new CryptoWallets([], [], []));
-                return account;
-            });
     }
 
-    public sendAccountToServerSide(account: Account): Promise<Account> {
-        return new Promise<Account>(resolve => {
-            console.log('account for server side: ', account);
-            resolve(account);
-        });
+    public async sendAccountToServerSide(account: Account): Promise<Account> {
+        console.log('account for server side: ', account);
+        this.account = account;
+        this.setWallets(new CryptoWallets([], [], []));
+
+        return account;
     }
 
     getNewMnemonic(): Promise<string> {
