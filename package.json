@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@bitclave/base-client-js": "^0.4.24",
-    "@types/node": "^11.13.8",
+    "@bitclave/base-client-js": "^0.4.25",
+    "@types/node": "^11.13.9",
     "@types/react": "^16.8.15",
     "@types/react-copy-to-clipboard": "^4.2.6",
     "@types/react-dom": "^16.8.3",
@@ -31,7 +31,7 @@
     "types-bn": "0.0.1",
     "types-buffer": "0.0.2",
     "typescript": "^3.4.5",
-    "web3": "^1.0.0-beta.53",
+    "web3": "^1.0.0-beta.54",
     "web3-typescript-typings": "^0.10.2"
   },
   "scripts": {
