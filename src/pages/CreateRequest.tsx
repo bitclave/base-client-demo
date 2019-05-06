@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { FormEvent } from 'react';
-import { RouteComponentProps } from 'react-router';
+import {FormEvent} from 'react';
+import {RouteComponentProps} from 'react-router';
 import Button from 'reactstrap/lib/Button';
 import Container from 'reactstrap/lib/Container';
 import Form from 'reactstrap/lib/Form';
@@ -8,7 +8,7 @@ import Input from 'reactstrap/lib/Input';
 import InputGroup from 'reactstrap/lib/InputGroup';
 import InputGroupAddon from 'reactstrap/lib/InputGroupAddon';
 import SimpleList from '../components/lists/SimpleList';
-import { Injections, lazyInject } from '../Injections';
+import {Injections, lazyInject} from '../Injections';
 import BaseManager from '../manager/BaseManager';
 
 interface Props extends RouteComponentProps<{}> {
@@ -114,32 +114,26 @@ export default class CreateRequest extends React.Component<Props, State> {
 
         this.baseManager.requestPermissions(this.state.searchClientId.trim(), fields)
             .then(result => alert('Request has been created!'))
-            .catch(reason =>
-                alert('Something went wrong! =(' + JSON.stringify(reason)));
+            .catch(reason => alert('Something went wrong! =(' + JSON.stringify(reason)));
 
         this.clientCheckedFields.clear();
-        const state: State = {
+        const state = {
             searchClientId: '',
-            clientFields: new Map<string, boolean>()
+            clientFields: new Map()
         };
         this.setState(state);
     }
 
     private onSearchClick() {
         this.clientCheckedFields.clear();
-        const state: State = {
-            searchClientId: '',
-            clientFields: new Map<string, boolean>()
-        };
-        this.setState(state);
+        this.setState({clientFields: new Map()});
 
         this.baseManager.getClientRawData(this.state.searchClientId.trim())
             .then((fields: Map<string, string>) => {
                 const keys: Array<string> = Array.from(fields.keys());
                 return this.mergePermissionsClientFields(this.state.searchClientId.trim(), keys);
-
-            }).then(result => this.setState({clientFields: result}))
-            .then(res => this.setState({}));
+            })
+            .then(result => this.setState({clientFields: result}));
     }
 
     private mergePermissionsClientFields(clientId: string, clientFields: Array<string>): Promise<Map<string, boolean>> {
