@@ -222,7 +222,7 @@ export default class Dashboard extends React.Component<Props, State> {
 
     private async onAcceptRawWallet(signedWallet: SupportSignedMessageData<CryptoWallet>): Promise<void> {
         const pos = this.state.clientData
-            .findIndex(model => model.key === WalletManagerImpl.DATA_KEY_ETH_WALLETS);
+            .findIndex(model => model.key === WalletManagerImpl.DATA_KEY_CRYPTO_WALLETS);
 
         const existedWallets = this.baseManager.getWallets().eth
             .concat(this.baseManager.getWallets().btc)
@@ -253,7 +253,7 @@ export default class Dashboard extends React.Component<Props, State> {
             this.state.clientData[pos].value = strJson;
 
         } else {
-            this.state.clientData.push(new Pair(WalletManagerImpl.DATA_KEY_ETH_WALLETS, strJson));
+            this.state.clientData.push(new Pair(WalletManagerImpl.DATA_KEY_CRYPTO_WALLETS, strJson));
         }
 
         this.setState({showRawWallet: false});
@@ -316,7 +316,7 @@ export default class Dashboard extends React.Component<Props, State> {
     }
 
     private async onVerifyWallets() {
-        const pos = this.state.clientData.findIndex(model => model.key === WalletManagerImpl.DATA_KEY_ETH_WALLETS);
+        const pos = this.state.clientData.findIndex(model => model.key === WalletManagerImpl.DATA_KEY_CRYPTO_WALLETS);
         if (pos >= 0) {
             const json = JSON.parse(this.state.clientData[pos].value);
             const signedCryptoWallets = CryptoWalletsData.fromJson(json);
@@ -334,7 +334,7 @@ export default class Dashboard extends React.Component<Props, State> {
     }
 
     private async onSignWallets() {
-        const pos = this.state.clientData.findIndex(model => model.key === WalletManagerImpl.DATA_KEY_ETH_WALLETS);
+        const pos = this.state.clientData.findIndex(model => model.key === WalletManagerImpl.DATA_KEY_CRYPTO_WALLETS);
         if (pos >= 0) {
             try {
                 const signedCryptoWallets = CryptoWalletsData.fromJson(JSON.parse(this.state.clientData[pos].value));
@@ -347,7 +347,7 @@ export default class Dashboard extends React.Component<Props, State> {
 
                 this.setState({});
 
-                alert(`${WalletManagerImpl.DATA_KEY_ETH_WALLETS} signed`);
+                alert(`${WalletManagerImpl.DATA_KEY_CRYPTO_WALLETS} signed`);
             } catch (err) {
                 console.log(err);
                 alert('exception in onSignWallets: ' + err);
