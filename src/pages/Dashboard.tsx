@@ -171,7 +171,7 @@ export default class Dashboard extends React.Component<Props, State> {
                     data.forEach((value, key) => {
                         this.state.clientData.push(new Pair(key, value));
 
-                        if (key === WalletManagerImpl.DATA_KEY_ETH_WALLETS) {
+                        if (key === WalletManagerImpl.DATA_KEY_CRYPTO_WALLETS) {
                             const json = JSON.parse(value);
                             this.baseManager.setWallets(CryptoWalletsData.fromJson(json).data);
                         }
