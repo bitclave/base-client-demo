@@ -1,5 +1,4 @@
-import { JsonUtils } from '@bitclave/base-client-js';
-import DataRequest from '@bitclave/base-client-js/dist/lib/repository/models/DataRequest';
+import { DataRequest, FieldData } from '@bitclave/base-client-js';
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import Button from 'reactstrap/lib/Button';
@@ -7,14 +6,13 @@ import Container from 'reactstrap/lib/Container';
 import PermissionsList from '../components/lists/PermissionsList';
 import { Injections, lazyInject } from '../Injections';
 import BaseManager from '../manager/BaseManager';
-import PermissionModel from '../models/PermissionModel';
 
 interface Props extends RouteComponentProps<{}> {
 }
 
 interface State {
-    permissionsDataRequest: Array<PermissionModel>;
-    permissionsDataResponse: Array<PermissionModel>;
+    permissionsDataRequest: Array<FieldData>;
+    permissionsDataResponse: Array<FieldData>;
 }
 
 export default class DataPermissions extends React.Component<Props, State> {
@@ -28,11 +26,12 @@ export default class DataPermissions extends React.Component<Props, State> {
             permissionsDataRequest: [],
             permissionsDataResponse: []
         };
+        /* у кого я запросил данные и что мне акцептировали */
         this.baseManager.getRequests(this.baseManager.account.publicKey, '')
             .then(this.onSyncRequest.bind(this));
 
-        this.baseManager.getRequests('', this.baseManager.account.publicKey)
-            .then(this.onSyncResponse.bind(this));
+        /* кто и какие поля у меня запросил */
+        this.onSyncResponse();
     }
 
     render() {
@@ -44,15 +43,21 @@ export default class DataPermissions extends React.Component<Props, State> {
                 <Container className="h-100 p-4">
                     <div className="h-100 justify-content-center align-items-center">
                         <div className="m-2 text-white">Response</div>
+                        {/* у кого я запросил данные и что мне акцептировали */}
                         <PermissionsList
                             data={this.state.permissionsDataRequest}
+                            accountPk={this.baseManager.getId()}
                             onAcceptClick={null}
+                            onRevokeClick={null}
                         />
                         <div className="m-4"/>
                         <div className="m-2 text-white">Request</div>
+                        {/* кто и какие поля у меня запросил */}
                         <PermissionsList
                             data={this.state.permissionsDataResponse}
-                            onAcceptClick={(index: number) => this.onAcceptClick(index)}
+                            accountPk={this.baseManager.getId()}
+                            onAcceptClick={request => this.onAcceptClick(request)}
+                            onRevokeClick={request => this.onRevokeClick(request)}
                         />
                     </div>
                 </Container>
@@ -61,56 +66,26 @@ export default class DataPermissions extends React.Component<Props, State> {
     }
 
     async onSyncRequest(requests: Array<DataRequest>) {
-        const result: Array<PermissionModel> = [];
-        let requestFields: Array<string> = [];
-        let authData: Map<string, string> = new Map();
+        const sharedData = await this.baseManager
+            .getProfileManager()
+            .getAuthorizedData(requests);
 
-        for (let item of requests) {
-            requestFields = await this.baseManager.decryptRequestFields(item.toPk, item.requestData);
-            authData.clear();
-
-            if (item.responseData != null && item.responseData.length > 0) {
-                authData = await this.baseManager.getAuthorizedData(item.toPk, item.responseData);
-            }
-
-            result.push(new PermissionModel(
-                item.fromPk,
-                item.toPk,
-                requestFields,
-                Array.from(authData.keys()),
-                authData,
-                this.baseManager.account.publicKey
-            ));
+        if (sharedData.data.size <= 0) {
+            return;
         }
+
+        let result: Array<FieldData> = Array.from(sharedData.data.values())
+            .reduce((previousValue, currentValue) => previousValue.concat(currentValue));
 
         this.setState({permissionsDataRequest: result});
     }
 
-    async onSyncResponse(requests: Array<DataRequest>) {
-        const result: Array<PermissionModel> = [];
-        let requestFields: Array<string> = [];
-        let authData: Map<string, string> = new Map();
-        let json;
+    async onSyncResponse() {
+        const result = (await this.baseManager.getDataReuqestManager()
+            .getRequestedPermissionsToMe())
+            .sort((a: FieldData, b: FieldData) => a.from === b.from ? -1 : 0);
 
-        for (let item of requests) {
-            requestFields = await this.baseManager.decryptRequestFields(item.fromPk, item.requestData);
-            authData.clear();
-
-            if (item.responseData != null && item.responseData.length > 0) {
-                json = await this.baseManager.decryptRequestFields(item.fromPk, item.responseData);
-                authData = JsonUtils.jsonToMap(json);
-            }
-
-            result.push(new PermissionModel(
-                item.fromPk,
-                item.toPk,
-                requestFields,
-                Array.from(authData.keys()),
-                authData,
-                this.baseManager.account.publicKey
-            ));
-        }
-
+        console.log(result);
         this.setState({permissionsDataResponse: result});
     }
 
@@ -119,18 +94,34 @@ export default class DataPermissions extends React.Component<Props, State> {
         history.goBack();
     }
 
-    private onAcceptClick(index: number) {
-        const request: PermissionModel = this.state.permissionsDataResponse[index];
-        this.baseManager.grandPermissions(request.from, request.requestFields)
-            .then((responseFields) => {
-                request.responseFields = responseFields;
-                this.setState({permissionsDataResponse: this.state.permissionsDataResponse});
-                alert('Fields was accepted');
-            })
-            .catch(reason => {
-                console.log(reason);
-                alert('Something went wrong');
-            });
+    private async onAcceptClick(fieldData: FieldData) {
+        try {
+            const accepted = (await this.baseManager.getDataReuqestManager().getRequestedPermissionsToMe())
+                .filter(item => item.from === fieldData.from && item.value && item.value.length > 0)
+                .map(item => item.key);
+
+            accepted.push(fieldData.key);
+
+            await this.baseManager.grandPermissions(fieldData.from, accepted);
+            this.onSyncResponse();
+            alert('Fields was accepted');
+
+        } catch (e) {
+            console.log(e);
+            alert('Something went wrong');
+        }
     }
 
+    private async onRevokeClick(fieldData: FieldData) {
+        try {
+            await this.baseManager.getDataReuqestManager()
+                .revokeAccessForClient(fieldData.from, [fieldData.key]);
+            this.onSyncResponse();
+            alert('Fields access was revoke');
+
+        } catch (e) {
+            console.log(e);
+            alert('Something went wrong');
+        }
+    }
 }

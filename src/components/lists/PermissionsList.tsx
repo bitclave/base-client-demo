@@ -1,10 +1,12 @@
+import { FieldData } from '@bitclave/base-client-js';
 import * as React from 'react';
-import PermissionModel from '../../models/PermissionModel';
 import PermissionHolder from '../holders/PermissionHolder';
 
 interface Properties {
-    data: Array<PermissionModel>;
-    onAcceptClick: ((index: number) => void) | null;
+    data: Array<FieldData>;
+    accountPk: string;
+    onAcceptClick: ((request: FieldData) => void) | null;
+    onRevokeClick: ((request: FieldData) => void) | null;
 }
 
 export default class PermissionsList extends React.Component<Properties, {}> {
@@ -18,15 +20,17 @@ export default class PermissionsList extends React.Component<Properties, {}> {
     }
 
     bindItems() {
-        const {data, onAcceptClick} = this.props;
+        const {data, onAcceptClick, onRevokeClick} = this.props;
         const result: Array<Object> = [];
         let item: object;
 
-        data.forEach((value: PermissionModel, index: number) => {
+        data.forEach((value: FieldData, index: number) => {
             item = (
                 <PermissionHolder
                     model={value}
-                    onAcceptClick={onAcceptClick == null ? null : () => onAcceptClick(index)}
+                    accountPk={this.props.accountPk}
+                    onAcceptClick={onAcceptClick == null ? null : () => onAcceptClick(value)}
+                    onRevokeClick={onRevokeClick == null ? null : () => onRevokeClick(value)}
                     key={index}
                 />
             );

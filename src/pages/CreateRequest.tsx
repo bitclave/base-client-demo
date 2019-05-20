@@ -1,6 +1,6 @@
 import * as React from 'react';
-import {FormEvent} from 'react';
-import {RouteComponentProps} from 'react-router';
+import { FormEvent } from 'react';
+import { RouteComponentProps } from 'react-router';
 import Button from 'reactstrap/lib/Button';
 import Container from 'reactstrap/lib/Container';
 import Form from 'reactstrap/lib/Form';
@@ -8,7 +8,7 @@ import Input from 'reactstrap/lib/Input';
 import InputGroup from 'reactstrap/lib/InputGroup';
 import InputGroupAddon from 'reactstrap/lib/InputGroupAddon';
 import SimpleList from '../components/lists/SimpleList';
-import {Injections, lazyInject} from '../Injections';
+import { Injections, lazyInject } from '../Injections';
 import BaseManager from '../manager/BaseManager';
 
 interface Props extends RouteComponentProps<{}> {
@@ -103,11 +103,15 @@ export default class CreateRequest extends React.Component<Props, State> {
         this.setState({clientFields: this.state.clientFields});
     }
 
-    private onSendRequestClick() {
+    private async onSendRequestClick() {
         const fields: Array<string> = [];
 
+        const requestedKeys = (await this.baseManager
+            .getAlreadyRequestedPermissions(this.state.searchClientId.trim()))
+            .map(field => field.key);
+
         this.state.clientFields.forEach((value, key) => {
-            if (value) {
+            if (value && requestedKeys.indexOf(key) <= -1) {
                 fields.push(key);
             }
         });
@@ -136,8 +140,12 @@ export default class CreateRequest extends React.Component<Props, State> {
             .then(result => this.setState({clientFields: result}));
     }
 
-    private mergePermissionsClientFields(clientId: string, clientFields: Array<string>): Promise<Map<string, boolean>> {
+    private async mergePermissionsClientFields(
+        clientId: string,
+        clientFields: Array<string>
+    ): Promise<Map<string, boolean>> {
         return this.baseManager.getAlreadyRequestedPermissions(clientId)
+            .then(permissions => permissions.map(item => item.key))
             .then((permissions: Array<string>) => {
                 const result: Map<string, boolean> = new Map();
 

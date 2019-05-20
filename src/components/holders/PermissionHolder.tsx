@@ -1,12 +1,14 @@
+import { FieldData } from '@bitclave/base-client-js';
 import * as React from 'react';
-import Button from 'reactstrap/lib/Button';
+import { Button } from 'reactstrap';
 import Col from 'reactstrap/lib/Col';
 import Row from 'reactstrap/lib/Row';
-import PermissionModel from '../../models/PermissionModel';
 
 interface Prop {
-    model: PermissionModel;
+    model: FieldData;
+    accountPk: string;
     onAcceptClick: (() => void) | null;
+    onRevokeClick: (() => void) | null;
 }
 
 export default class PermissionHolder extends React.Component<Prop, {}> {
@@ -20,11 +22,10 @@ export default class PermissionHolder extends React.Component<Prop, {}> {
                     <Col className="client-data-item-field" xs="2">
                         Requested:
                         <br/>
-                        {this.prepareRequestFields()}
+                        <div>{this.props.model.key}</div>
                     </Col>
                     <Col className="client-data-item-field" xs="3">
                         Accepted:
-                        <br/>
                         <br/>
                         {this.prepareResponseFields()}
                     </Col>
@@ -37,73 +38,57 @@ export default class PermissionHolder extends React.Component<Prop, {}> {
 
     private prepareFromTo() {
         const result = [];
-        const {from, to, accountPublicKey} = this.props.model;
+        const {from, to} = this.props.model;
 
-        if (from && from !== accountPublicKey) {
+        if (from && from !== this.props.accountPk) {
             result.push(<div key="from">from: {from}</div>);
         }
 
-        if (to && to !== accountPublicKey) {
+        if (to && to !== this.props.accountPk) {
             result.push(<div key="to">to: {to}</div>);
         }
 
         return result;
     }
 
-    private prepareRequestFields() {
-        if (this.props.model.requestFields.length < 1) {
-            return <div key="grant">grant access</div>;
-        }
-
-        if (this.props.model.requestFields && this.props.model.requestFields.length) {
-            return this.props.model.requestFields.map(item => {
-                return <div key={item}>{item}</div>;
-            });
-        }
-
-    }
-
     private prepareResponseFields() {
-        if (this.props.model.to === this.props.model.accountPublicKey) {
-            return this.props.model.responseFields.map(item => {
-                return <div key={item}>{item}</div>;
-            });
-        }
-
-        const result: any[] = [];
-        this.props.model.decryptedFields.forEach((value, key) => {
-            result.push(<div key={key}>{key} => {value}</div>);
-        });
-
-        return result;
+        const responseData = this.props.model.value;
+        return <div>{responseData ? responseData : 'not granted or client not has field'}</div>;
     }
 
     private prepareAcceptButton() {
-        if (this.props.onAcceptClick == null || this.props.model.accountPublicKey !== this.props.model.to) {
+        const {model, onAcceptClick, onRevokeClick} = this.props;
+
+        if (onAcceptClick === null || onRevokeClick === null || this.props.accountPk !== model.to) {
             return;
         }
 
-        const {responseFields, requestFields} = this.props.model;
-
-        if (requestFields.length < 1) {
-            return;
-        }
-
-        // const missing = responseFields.filter(item => requestFields.indexOf(item) < 0);
-        const missing = requestFields.filter(item => responseFields.indexOf(item) < 0);
-        if (responseFields.length !== requestFields.length || missing.length > 0) {
+        if (model.value) {
             return (
                 <Col className="client-data-item-field" xs="auto">
-                    <Button color="success" onClick={() => {
-                        if (this.props.onAcceptClick) {
-                            this.props.onAcceptClick()
+                    <Button color="danger" onClick={() => {
+                        if (onRevokeClick) {
+                            onRevokeClick();
                         }
                     }
-                    }>Accept</Button>
+                    }>
+                        Revoke
+                    </Button>
                 </Col>
             );
         }
 
+        return (
+            <Col className="client-data-item-field" xs="auto">
+                <Button color="success" onClick={() => {
+                    if (onAcceptClick) {
+                        onAcceptClick();
+                    }
+                }
+                }>
+                    Accept
+                </Button>
+            </Col>
+        );
     }
-
 }
