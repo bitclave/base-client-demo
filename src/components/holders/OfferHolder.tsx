@@ -1,8 +1,9 @@
+import { Offer } from '@bitclave/base-client-js';
 import * as React from 'react';
 import Col from 'reactstrap/lib/Col';
 import Row from 'reactstrap/lib/Row';
 import AbstractHolder, { AbstractProperties, AbstractState } from './AbstractHolder';
-import { Offer } from '@bitclave/base-client-js';
+import './OfferHolder.scss';
 
 interface Properties extends AbstractProperties<Offer> {
 }
@@ -43,7 +44,7 @@ export default class OfferHolder extends AbstractHolder<Properties, Offer, Abstr
         const result: Array<object> = [];
 
         map.forEach((value, key) => {
-            result.push(<div key={key.toString()}>{key}: {value.toString()}</div>);
+            result.push(<div className="OfferHolder__item" key={key.toString()}>{key}: {value.toString()}</div>);
         });
 
         return result;

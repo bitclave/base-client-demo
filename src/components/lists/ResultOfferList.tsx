@@ -1,4 +1,4 @@
-import { OfferSearchResultItem } from '@bitclave/base-client-js';
+import { OfferResultAction, OfferSearchResultItem } from '@bitclave/base-client-js';
 import * as React from 'react';
 import OfferHolder from '../holders/OfferHolder';
 import OfferSearchHolder from '../holders/OfferSearchHolder';
@@ -26,6 +26,7 @@ export default class ResultOfferList extends AbstractList<Properties, OfferSearc
                     onComplainClick={() => this.props.onComplainClick(dataItem)}
                     onGrantAccessClick={() => this.props.onGrantAccessClick(dataItem)}
                     model={dataItem.offerSearch}
+                    state={dataItem.interaction ? dataItem.interaction.state : OfferResultAction.NONE}
                     key={`stat-${position}`}
                 />
             </div>
