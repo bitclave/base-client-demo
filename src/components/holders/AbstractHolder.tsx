@@ -22,7 +22,7 @@ export default abstract class AbstractHolder<P extends AbstractProperties<M>, M,
         return (
             <div
                 onClick={() => this.props.onClick(this.props.model, this)}
-                className={this.state.selected ? 'active' : ''}
+                className={this.props.selected ? 'active' : ''}
             >
                 {this.bindModel(this.props.model)}
             </div>
