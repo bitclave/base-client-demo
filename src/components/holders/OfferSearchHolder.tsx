@@ -1,4 +1,4 @@
-import { OfferResultAction, OfferSearch } from '@bitclave/base-client-js';
+import { OfferResultAction, OfferSearch, OfferSearchResultItem } from '@bitclave/base-client-js';
 import * as React from 'react';
 import Button from 'reactstrap/lib/Button';
 import Col from 'reactstrap/lib/Col';
@@ -8,30 +8,33 @@ import AbstractHolder, { AbstractProperties, AbstractState } from './AbstractHol
 interface Properties extends AbstractProperties<OfferSearch> {
     onComplainClick: Function;
     onGrantAccessClick: Function;
+    state: OfferResultAction;
 }
 
 export default class OfferSearchHolder extends AbstractHolder<Properties, OfferSearch, AbstractState> {
 
     public bindModel(model: OfferSearch): object {
+        const state = this.props.state;
+
         return (
             <Row>
                 <Col className="client-data-item-field" xs="2" sm="3">
-                    status: {model.state}
+                    status: {state}
                 </Col>
                 <Col className="client-data-item-field" xs="6" sm="3">
-                    {this.getComplainButton(model)}
+                    {this.getComplainButton(model, state)}
                 </Col>
                 <Col className="client-data-item-field" xs="6" sm="3">
-                    {this.getGrantAccessButton(model)}
+                    {this.getGrantAccessButton(model, state)}
                 </Col>
             </Row>
         );
     }
 
-    private getComplainButton(model: OfferSearch): object {
+    private getComplainButton(model: OfferSearch, state: OfferResultAction): object {
         return (
             <Button
-                disabled={model.state !== OfferResultAction.NONE}
+                disabled={state !== OfferResultAction.NONE}
                 className="m-2"
                 color="danger"
                 size="sm"
@@ -42,10 +45,9 @@ export default class OfferSearchHolder extends AbstractHolder<Properties, OfferS
         );
     }
 
-    private getGrantAccessButton(model: OfferSearch): object {
+    private getGrantAccessButton(model: OfferSearch, state: OfferResultAction): object {
         return (
             <Button
-                disabled={model.state !== OfferResultAction.NONE}
                 className="m-2"
                 color="success"
                 size="sm"
