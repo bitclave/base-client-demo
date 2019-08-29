@@ -13,6 +13,7 @@ import CreateOffer from './pages/CreateOffer';
 import SearchOfferMatch from './pages/SearchOfferMatch';
 import DataPermissions from './pages/DataPermissions';
 import SearchResult from './pages/SearchResult';
+import 'antd/dist/antd.css'
 
 ReactDOM.render(
     <HashRouter>

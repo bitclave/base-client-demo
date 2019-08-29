@@ -6,9 +6,20 @@ export interface AbstractProperties<M> {
     selectable?: boolean;
 }
 
-export default abstract class AbstractList<P extends AbstractProperties<M>, M> extends React.Component<P> {
+export interface AbstractState<M> {
+    selected: M | undefined;
+}
 
-    private selected: React.Component | undefined = undefined;
+export default abstract class AbstractList<P extends AbstractProperties<M>, M>
+    extends React.Component<P, AbstractState<M>> {
+
+    constructor(props: Readonly<P>) {
+        super(props);
+
+        this.state = {
+            selected: undefined
+        }
+    }
 
     public render() {
         return (
@@ -35,11 +46,7 @@ export default abstract class AbstractList<P extends AbstractProperties<M>, M> e
         }
 
         if (this.props.selectable) {
-            if (this.selected !== undefined) {
-                this.selected.setState({selected: false});
-            }
-            this.selected = target;
-            this.selected.setState({selected: true});
+            this.setState({selected: item})
         }
     }
 
