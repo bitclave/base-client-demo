@@ -4,11 +4,13 @@ import Base, {
     CryptoWallets,
     DataRequest,
     DataRequestManager,
+    FieldData,
     Offer,
     OfferManager,
     ProfileManager,
     RepositoryStrategyType,
     SearchManager,
+    SharedData,
     WalletManager,
 } from '@bitclave/base-client-js';
 import { injectable } from 'inversify';
@@ -41,13 +43,13 @@ export default class BaseManager {
     signUp(mnemonicPhrase: string): Promise<Account> {
         return this.getUniqueMessageForSigFromServerSide()
             .then(uniqueMessage => this.base.accountManager.registration(mnemonicPhrase, uniqueMessage))
-            .then(this.sendAccountToServerSide.bind(this))
+            .then(this.sendAccountToServerSide.bind(this));
     }
 
     signIn(mnemonicPhrase: string): Promise<Account> {
         return this.getUniqueMessageForSigFromServerSide()
             .then(uniqueMessage => this.base.accountManager.checkAccount(mnemonicPhrase, uniqueMessage))
-            .then(this.sendAccountToServerSide.bind(this))
+            .then(this.sendAccountToServerSide.bind(this));
     }
 
     public async sendAccountToServerSide(account: Account): Promise<Account> {
@@ -100,7 +102,7 @@ export default class BaseManager {
         return this.base.profileManager.updateData(data);
     }
 
-    decryptRequestFields(senderPk: string, encryptedData: string): Promise<any> {
+    decryptRequestFields(senderPk: string, encryptedData: string): Promise<object | string> {
         return this.base.dataRequestManager.decryptMessage(senderPk, encryptedData);
     }
 
@@ -108,15 +110,15 @@ export default class BaseManager {
         return this.base.profileManager.getRawData(clientPk);
     }
 
-    getAuthorizedData(recipientPk: string, encryptedData: string): Promise<Map<string, string>> {
-        return this.base.profileManager.getAuthorizedData(recipientPk, encryptedData);
+    getAuthorizedData(acceptedRequests: Array<DataRequest>): Promise<SharedData> {
+        return this.base.profileManager.getAuthorizedData(acceptedRequests);
     }
 
-    getAlreadyRequestedPermissions(recipientPk: string): Promise<Array<string>> {
+    getAlreadyRequestedPermissions(recipientPk?: string | undefined): Promise<Array<FieldData>> {
         return this.base.dataRequestManager.getRequestedPermissions(recipientPk);
     }
 
-    requestPermissions(recipientPk: string, fields: Array<string>): Promise<number> {
+    requestPermissions(recipientPk: string, fields: Array<string>): Promise<void> {
         return this.base.dataRequestManager.requestPermissions(recipientPk, fields);
     }
 
@@ -147,8 +149,10 @@ export default class BaseManager {
         return grantedFields;
     }
 
-    getRequests(fromPk?: string, toPk?: string): Promise<DataRequest[]> {
-        return this.base.dataRequestManager.getRequests(fromPk as string, toPk as string); // todo fix in Base lib v0.4.3
+    async getRequests(fromPk: string | null, toPk: string | null): Promise<DataRequest[]> {
+        const result = await this.base.dataRequestManager.getRequests(fromPk, toPk);
+        console.log(result);
+        return result;
     }
 
     logout() {

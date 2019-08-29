@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@bitclave/base-client-js": "^0.4.48",
+    "@bitclave/base-client-js": "^0.4.67",
     "@types/node": "^11.13.10",
     "@types/react": "^16.8.17",
     "@types/react-copy-to-clipboard": "^4.2.6",
@@ -12,7 +12,7 @@
     "@types/reactstrap": "^7.1.3",
     "antd": "^3.20.0",
     "bitcore-ecies": "^1.0.3",
-    "bitcore-lib": "^8.3.0",
+    "bitcore-lib": "^8.6.0",
     "bitcore-message": "^1.0.4",
     "bitcore-mnemonic": "^8.3.0",
     "bootstrap": "^4.3.1",
