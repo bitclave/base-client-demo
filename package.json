@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@bitclave/base-client-js": "^0.4.67",
+    "@bitclave/base-client-js": "^0.4.69",
     "@types/node": "^11.13.10",
     "@types/react": "^16.8.17",
     "@types/react-copy-to-clipboard": "^4.2.6",
