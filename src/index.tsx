@@ -1,19 +1,20 @@
+import 'antd/dist/antd.css';
+import 'bootstrap/dist/css/bootstrap.css';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import 'bootstrap/dist/css/bootstrap.css';
-import './res/styles/index.css';
-import Dashboard from './pages/Dashboard';
-import Auth from './pages/Auth';
 import { HashRouter, Route } from 'react-router-dom';
-import CreateRequest from './pages/CreateRequest';
-import SearchRequests from './pages/SearchRequests';
-import Offers from './pages/Offers';
-import CreateSearchRequest from './pages/CreateSearchRequest';
+import Auth from './pages/Auth';
 import CreateOffer from './pages/CreateOffer';
-import SearchOfferMatch from './pages/SearchOfferMatch';
+import CreateRequest from './pages/CreateRequest';
+import CreateSearchRequest from './pages/CreateSearchRequest';
+import Dashboard from './pages/Dashboard';
 import DataPermissions from './pages/DataPermissions';
+import GrantPermissions from './pages/GrantPermissions';
+import Offers from './pages/Offers';
+import SearchOfferMatch from './pages/SearchOfferMatch';
+import SearchRequests from './pages/SearchRequests';
 import SearchResult from './pages/SearchResult';
-import 'antd/dist/antd.css'
+import './res/styles/index.css';
 
 ReactDOM.render(
     <HashRouter>
@@ -28,6 +29,7 @@ ReactDOM.render(
             <Route path="/offers/" component={Offers}/>
             <Route path="/create-offer/" component={CreateOffer}/>
             <Route path="/search-match/" component={SearchOfferMatch}/>
+            <Route path="/grant-permissions/" component={GrantPermissions}/>
         </div>
     </HashRouter>,
     document.getElementById('root') as HTMLElement

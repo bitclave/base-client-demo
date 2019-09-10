@@ -86,6 +86,9 @@ export default class Dashboard extends React.Component<Props, State> {
                     <Button color="primary" onClick={() => this.onMatchClick()}>
                         Match Search And Offer
                     </Button>
+                    <Button color="primary" onClick={() => this.onGrantPermissionsClick()}>
+                        Grant permissions
+                    </Button>
                 </ButtonGroup>
 
                 <div className="m-2 text-white">your id: {this.baseManager.getId()}</div>
@@ -189,7 +192,7 @@ export default class Dashboard extends React.Component<Props, State> {
         this.setState({
             showRawWallet: true,
             rawWalletType: type
-        })
+        });
     }
 
     private prepareRawWalletBlock(): React.ReactNode {
@@ -201,7 +204,7 @@ export default class Dashboard extends React.Component<Props, State> {
             <div className="Dashboard__raw-wallet__container">
                 {this.prepareRawWalletView()}
             </div>
-        )
+        );
     }
 
     private prepareRawWalletView() {
@@ -217,7 +220,7 @@ export default class Dashboard extends React.Component<Props, State> {
                 onCancelClick={() => this.setState({showRawWallet: false})
                 }
             />
-        )
+        );
     }
 
     private async onAcceptRawWallet(signedWallet: SupportSignedMessageData<CryptoWallet>): Promise<void> {
@@ -301,6 +304,11 @@ export default class Dashboard extends React.Component<Props, State> {
     private onMatchClick() {
         const {history} = this.props;
         history.push('search-match');
+    }
+
+    private onGrantPermissionsClick() {
+        const {history} = this.props;
+        history.push('grant-permissions');
     }
 
     private onSaveClick() {
