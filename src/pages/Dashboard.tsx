@@ -77,6 +77,9 @@ export default class Dashboard extends React.Component<Props, State> {
                     <Button color="primary" onClick={() => this.onCreateRequestClick()}>
                         Request permissions
                     </Button>
+                    <Button color="primary" onClick={() => this.onGrantPermissionsClick()}>
+                        Grant permissions
+                    </Button>
                     <Button color="primary" onClick={() => this.onSearchRequestsClick()}>
                         Search Requests
                     </Button>
@@ -85,9 +88,6 @@ export default class Dashboard extends React.Component<Props, State> {
                     </Button>
                     <Button color="primary" onClick={() => this.onMatchClick()}>
                         Match Search And Offer
-                    </Button>
-                    <Button color="primary" onClick={() => this.onGrantPermissionsClick()}>
-                        Grant permissions
                     </Button>
                 </ButtonGroup>
 
